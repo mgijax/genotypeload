@@ -40,7 +40,7 @@ OUTPUTDIR=${FILEDIR}/output
 
 # directory where input files are created by genotypeload.py
 INPUTDIR=${FILEDIR}/input
-INFILE_NAME=${INPUTDIR}/mgi_genotype_input.txt
+INFILE_NAME=${INPUTDIR}/mgi_genotype_input.tsv
 
 export FILEDIR ARCHIVEDIR LOGDIR RPTDIR OUTPUTDIR INPUTDIR INFILE_NAME
 
@@ -60,6 +60,12 @@ export LOG_FILE LOG_PROC LOG_DIAG LOG_CUR LOG_VAL LOG_DEBUG
 JOBSTREAM=genotypeload
 
 export JOBSTREAM
+
+# Genotype load
+#GENOTYPEMODE=preview
+GENOTYPEMODE=load
+
+export GENOTYPEMODE
 
 ###########################################################################
 #

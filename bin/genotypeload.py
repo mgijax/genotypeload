@@ -16,23 +16,29 @@
 #
 # Envvars:
 #
+#	MGD_DBUSER
+#	MGD_DBPASSWORDFILE
+#	GENOTYPE_INPUT_FILE
+#	GENOTYPEMODE
+#	OUTPUTDIR
+#
 # Inputs:
 #
-#	A tab-delimited file in the format:
+#	A tab-delimited file in the format (GENOTYPE_INPUT_FILE):
 #
-#	field 1:  Strain ID
-#	field 2:  Strain Name
-#	field 3:  MGI Marker ID
-#	field 4:  Allele 1 ID
-#	field 5:  Allele 2 ID
-#	field 6:  Conditional (yes/no)
-#	field 7:  Exist As Term (ex. 'Mouse Line', 'Cell Line', 'Chimeric')
+#	field 1:  Genotype ID
+#	field 2:  Strain ID
+#	field 3:  Strain Name
+#	field 4:  MGI Marker ID
+#	field 5:  Allele 1 ID
+#	field 6:  Allele 2 ID
+#	field 7:  Conditional (yes/no)
 #	field 8:  Exist As Term (ex. 'Mouse Line', 'Cell Line', 'Chimeric')
 #	field 9:  General Notes (ex. 1027)
-#	field 10: Private Notes (ex. 1028)
+#	field 10:  Private Notes (ex. 1028)
 #	field 11: Pair State (ex. 'Homozygous', 'Hemizygous X-linked', etc.)
 #	field 12: Compound (ex. 'Top', 'Bottom', 'Not Applicable'
-#	field 13: Creation Date
+#	field 13: Created By User
 #
 # This assumes only one allele pair
 # Once more than one allele pair is needed, revisions will need to be made
@@ -79,7 +85,6 @@
 
 import sys
 import os
-import accessionlib
 import db
 import mgi_utils
 import loadlib
@@ -92,8 +97,8 @@ import loadlib
 user = os.environ['MGD_DBUSER']
 passwordFileName = os.environ['MGD_DBPASSWORDFILE']
 mode = os.environ['GENOTYPEMODE']
-inputFileName = os.environ['GENOTYPEDATAFILE']
-outputDir = os.environ['GENOTYPEDATADIR']
+inputFileName = os.environ['GENOTYPE_INPUT_FILE']
+outputDir = os.environ['OUTPUTDIR']
 
 DEBUG = 0		# if 0, not in debug mode
 TAB = '\t'		# tab
@@ -111,11 +116,11 @@ noteFile = ''		# file descriptor
 noteChunkFile = ''	# file descriptor
 
 genotypeTable = 'GXD_Genotype'
-allelepairTable = 'ALL_Marker_Assoc'
+allelepairTable = 'GXD_AllelePair'
 accTable = 'ACC_Accession'
 noteTable = 'MGI_Note'
 noteChunkTable = 'MGI_NoteChunk'
-newGenotypeFile = 'newAllele.txt'
+newGenotypeFile = 'newGenotype.txt'
 
 genotypeFileName = outputDir + '/' + genotypeTable + '.bcp'
 allelepairFileName = outputDir + '/' + allelepairTable + '.bcp'
@@ -349,34 +354,31 @@ def processFile():
         # Split the line into tokens
         tokens = line[:-1].split('\t')
 
-#	field 1:  Strain ID
-#	field 2:  Strain Name
-#	field 3:  MGI Marker ID
-#	field 4:  Allele 1 ID
-#	field 5:  Allele 2 ID
-#	field 6:  Conditional (yes/no)
-#	field 7:  Exist As Term (ex. 'Mouse Line', 'Cell Line', 'Chimeric')
-#	field 8:  General Notes (ex. 1027)
-#	field 9:  Private Notes (ex. 1028)
-#	field 10: Pair State (ex. 'Homozygous', 'Hemizygous X-linked', etc.)
-#	field 11: Compound (ex. 'Top', 'Bottom', 'Not Applicable'
-#	field 12: Creation Date
-
         try:
-	    strainID = tokens[0]
-	    strainName = tokens[1]
-	    markerID = tokens[2]
-	    allele1ID = tokens[3]
-	    allele2ID = tokens[4]
-	    conditional = tokens[5]
-	    existsAs = tokens[6]
-	    generalNote = tokens[7]
-	    privateNote = tokens[8]
-	    pairState = tokens[9]
-	    pairCompound = tokens[10]
-	    createdBy = tokens[11]
+	    genotypeID = tokens[0]
+	    strainID = tokens[1]
+	    strainName = tokens[2]
+	    markerID = tokens[3]
+	    allele1ID = tokens[4]
+	    allele2ID = tokens[5]
+	    conditional = tokens[6]
+	    existsAs = tokens[7]
+	    generalNote = tokens[8]
+	    privateNote = tokens[9]
+	    pairState = tokens[10]
+	    pairCompound = tokens[11]
+	    createdBy = tokens[12]
         except:
             exit(1, 'Invalid Line (%d): %s\n' % (lineNum, line))
+
+	# if the genotypeID is specified, then skip this row
+	# this signifies that this genotype already exists in the system
+
+	if len(genotypeID) > 0:
+            newGenotypeFile.write('%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' % (\
+	        genotypeID, strainID, strainName, markerID, allele1ID, allele2ID, conditional, \
+	        existsAs, generalNote, privateNote, pairState, pairCompound, createdBy))
+	    continue
 
 	# strain key
 	strainKey = loadlib.verifyObject(strainID, strainTypeKey, None, lineNum, errorFile)
@@ -388,7 +390,10 @@ def processFile():
 	allele1Key = loadlib.verifyObject(allele1ID, alleleTypeKey, None, lineNum, errorFile)
 
 	# allele2 key
-	allele2Key = loadlib.verifyObject(allele2ID, alleleTypeKey, None, lineNum, errorFile)
+	if allele2ID == 0:
+	    allele2Key = loadlib.verifyObject(allele2ID, alleleTypeKey, None, lineNum, errorFile)
+        else:
+	    allele2Key = ''
 
 	if conditional == 'yes':
 	    conditionalKey = 1
@@ -409,7 +414,6 @@ def processFile():
 	if strainKey == 0 \
 		or markerKey == 0 \
 		or allele1Key == 0 \
-		or allele2Key == 0 \
 		or existsAsKey == 0 \
 		or pairStateKey == 0 \
 		or pairCompundKey == 0 \
@@ -442,18 +446,10 @@ def processFile():
 
 	# Print out a new text file and attach the new MGI Allele IDs as the last field
 
-        newGenotypeFile.write('%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s%s\n' \
-	    % (markerID, \
-	    symbol, \
-	    name, \
-	    alleleStatus, \
-	    alleleType, \
-	    mgi_utils.prvalue(germLine), \
-	    references, \
-	    mgi_utils.prvalue(strainOfOrigin), \
-	    mgi_utils.prvalue(molecularNotes), \
-	    mgi_utils.prvalue(driverNotes), \
-	    createdBy, mgiPrefix, mgiKey))
+	genotypeID = mgiPrefix + str(mgiKey)
+        newGenotypeFile.write('%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' % (\
+	    genotypeID, strainID, strainName, markerID, allele1ID, allele2ID, conditional, \
+	    existsAs, generalNote, privateNote, pairState, pairCompound, createdBy))
 
         accKey = accKey + 1
         mgiKey = mgiKey + 1

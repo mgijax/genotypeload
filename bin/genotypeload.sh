@@ -42,14 +42,14 @@
 
 cd `dirname $0`
 
-CONFIG=genotypeload.config
+CONFIG=$1
 
 #
 # Make sure the configuration file exists and source it.
 #
-if [ -f ../${CONFIG} ]
+if [ -f ${CONFIG} ]
 then
-    . ../${CONFIG}
+    . ${CONFIG}
 else
     echo "Missing configuration file: ${CONFIG}"
     exit 1
@@ -76,7 +76,7 @@ fi
 #
 # createArchive
 #
-preload ${OUTPUTDIR}
+#preload ${OUTPUTDIR}
 
 #
 # Establish the log file.
@@ -98,5 +98,5 @@ checkStatus ${STAT} "genotypeload.py"
 #
 # run postload cleanup and email logs
 #
-shutDown
+#shutDown
 exit 0
