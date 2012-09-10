@@ -26,19 +26,20 @@
 #
 #	A tab-delimited file in the format (GENOTYPE_INPUT_FILE):
 #
-#	field 1:  Genotype ID
-#	field 2:  Strain ID
-#	field 3:  Strain Name
-#	field 4:  MGI Marker ID
-#	field 5:  Allele 1 ID
-#	field 6:  Allele 2 ID
-#	field 7:  Conditional (yes/no)
-#	field 8:  Exist As Term (ex. 'Mouse Line', 'Cell Line', 'Chimeric')
-#	field 9:  General Notes (ex. 1027)
-#	field 10:  Private Notes (ex. 1028)
-#	field 11: Pair State (ex. 'Homozygous', 'Hemizygous X-linked', etc.)
-#	field 12: Compound (ex. 'Top', 'Bottom', 'Not Applicable'
-#	field 13: Created By User
+#	field 1:  Genotype Order #
+#	field 2:  Genotype ID
+#	field 3:  Strain ID
+#	field 4:  Strain Name
+#	field 5:  MGI Marker ID
+#	field 6:  Allele 1 ID
+#	field 7:  Allele 2 ID
+#	field 8:  Conditional (yes/no)
+#	field 9:  Exist As Term (ex. 'Mouse Line', 'Cell Line', 'Chimeric')
+#	field 10: General Notes (ex. 1027)
+#	field 11: Private Notes (ex. 1028)
+#	field 12: Pair State (ex. 'Homozygous', 'Hemizygous X-linked', etc.)
+#	field 13: Compound (ex. 'Top', 'Bottom', 'Not Applicable'
+#	field 14: Created By User
 #
 # This assumes only one allele pair
 # Once more than one allele pair is needed, revisions will need to be made
@@ -355,19 +356,20 @@ def processFile():
         tokens = line[:-1].split('\t')
 
         try:
-	    genotypeID = tokens[0]
-	    strainID = tokens[1]
-	    strainName = tokens[2]
-	    markerID = tokens[3]
-	    allele1ID = tokens[4]
-	    allele2ID = tokens[5]
-	    conditional = tokens[6]
-	    existsAs = tokens[7]
-	    generalNote = tokens[8]
-	    privateNote = tokens[9]
-	    pairState = tokens[10]
-	    pairCompound = tokens[11]
-	    createdBy = tokens[12]
+	    genotypeOrder = tokens[0]
+	    genotypeID = tokens[1]
+	    strainID = tokens[2]
+	    strainName = tokens[3]
+	    markerID = tokens[4]
+	    allele1ID = tokens[5]
+	    allele2ID = tokens[6]
+	    conditional = tokens[7]
+	    existsAs = tokens[8]
+	    generalNote = tokens[9]
+	    privateNote = tokens[10]
+	    pairState = tokens[11]
+	    pairCompound = tokens[12]
+	    createdBy = tokens[13]
         except:
             exit(1, 'Invalid Line (%d): %s\n' % (lineNum, line))
 
@@ -447,8 +449,8 @@ def processFile():
 	# Print out a new text file and attach the new MGI Allele IDs as the last field
 
 	genotypeID = mgiPrefix + str(mgiKey)
-        newGenotypeFile.write('%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' % (\
-	    genotypeID, strainID, strainName, markerID, allele1ID, allele2ID, conditional, \
+        newGenotypeFile.write('%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' % (\
+	    genotypeOrder, genotypeID, strainID, strainName, markerID, allele1ID, allele2ID, conditional, \
 	    existsAs, generalNote, privateNote, pairState, pairCompound, createdBy))
 
         accKey = accKey + 1

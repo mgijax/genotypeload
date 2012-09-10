@@ -43,6 +43,7 @@
 cd `dirname $0`
 
 CONFIG=$1
+echo $CONFIG
 
 #
 # Make sure the configuration file exists and source it.
@@ -82,8 +83,8 @@ fi
 # Establish the log file.
 #
 LOG=${LOG_DIAG}
-rm -rf ${LOG}
-touch ${LOG}
+#rm -rf ${LOG}
+#touch ${LOG}
 
 #
 # Load Genotype file
