@@ -155,7 +155,7 @@ strainTypeKey = 10      # ACC_MGIType._MGIType_key for Strain
 alleleTypeKey = 11      # ACC_MGIType._MGIType_key for Allele
 mgiPrefix = "MGI:"
 
-runAlleleCombination = None	# run the alleleCombinationByGenotype for each genotype added
+runAlleleCombination = ''	# run the alleleCombinationByGenotype for each genotype added
 
 loaddate = loadlib.loaddate
 
@@ -468,7 +468,7 @@ def processFile():
 	    existsAs, generalNote, privateNote, pairState, pairCompound, createdBy))
 
 	# call allele-combinatin re-fresh for this genotype
-	runAlleleCombination = runAlleleCombination + alleleCombination % (genotypeKey)
+	runAlleleCombination = runAlleleCombination + alleleCombination % (str(genotypeKey))
 
         accKey = accKey + 1
         mgiKey = mgiKey + 1
