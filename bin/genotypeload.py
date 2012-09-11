@@ -102,6 +102,7 @@ doCacheAdmin = os.environ['GENOTYPELOAD_CACHE_ADMIN']
 mode = os.environ['GENOTYPELOAD_MODE']
 inputFileName = os.environ['GENOTYPE_INPUT_FILE']
 outputDir = os.environ['OUTPUTDIR']
+genotypeOutput = os.environ['GENOTYPELOAD_OUTPUT']
 
 accSetMax = 'exec ACC_setMax %d'
 
@@ -138,7 +139,6 @@ allelepairTable = 'GXD_AllelePair'
 accTable = 'ACC_Accession'
 noteTable = 'MGI_Note'
 noteChunkTable = 'MGI_NoteChunk'
-newGenotypeFile = 'newGenotype.txt'
 
 genotypeFileName = outputDir + '/' + genotypeTable + '.bcp'
 genotypeCacheFileName = outputDir + '/' + genotypeCacheTable + '.bcp'
@@ -146,7 +146,7 @@ allelepairFileName = outputDir + '/' + allelepairTable + '.bcp'
 accFileName = outputDir + '/' + accTable + '.bcp'
 noteFileName = outputDir + '/' + noteTable + '.bcp'
 noteChunkFileName = outputDir + '/' + noteChunkTable + '.bcp'
-newGenotypeFileName = outputDir + '/' + newGenotypeFile
+genotypeOutputName = outputDir + '/' + genotypeOutput
 
 diagFileName = ''	# diagnostic file name
 errorFileName = ''	# error file name
@@ -207,7 +207,7 @@ def init():
     global diagFile, errorFile, inputFile, errorFileName, diagFileName
     global genotypeFile, genotypeCacheFile, allelepairFile
     global accFile, noteFile, noteChunkFile
-    global newGenotypeFile
+    global genotypeOutput
  
     db.useOneConnection(1)
     db.set_sqlUser(user)
@@ -264,9 +264,9 @@ def init():
         exit(1, 'Could not open file %s\n' % noteChunkFileName)
 
     try:
-        newGenotypeFile = open(newGenotypeFileName, 'w')
+        genotypeOutput = open(genotypeOutputName, 'w')
     except:
-        exit(1, 'Could not open file %s\n' % newGenotypeFileName)
+        exit(1, 'Could not open file %s\n' % genotypeOutputName)
 
     # Log all SQL
     db.set_sqlLogFunction(db.sqlLogAll)
@@ -409,7 +409,7 @@ def processFile():
 	# this signifies that this genotype already exists in the system
 
 	if len(genotypeID) > 0:
-            newGenotypeFile.write('%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' % (\
+            genotypeOutput.write('%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' % (\
 	        genotypeOrder, genotypeID, strainID, strainName, markerID, allele1ID, allele2ID, conditional, \
 	        existsAs, generalNote, privateNote, pairState, pairCompound, createdBy))
 	    continue
@@ -486,7 +486,7 @@ def processFile():
 
 	genotypeID = mgiPrefix + str(mgiKey)
 
-        newGenotypeFile.write('%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' % (\
+        genotypeOutput.write('%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' % (\
 	    genotypeOrder, genotypeID, strainID, strainName, markerID, allele1ID, allele2ID, conditional, \
 	    existsAs, generalNote, privateNote, pairState, pairCompound, createdBy))
 
