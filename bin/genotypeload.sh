@@ -94,7 +94,17 @@ date >> ${LOG}
 echo "Call genotypeload.py" | tee -a ${LOG}
 ./genotypeload.py 2>&1 >> ${LOG}
 STAT=$?
-checkStatus ${STAT} "genotypeload.py"
+checkStatus ${STAT} "Call genotypeload.py"
+
+#
+# Run Allele Combinase Cache (**after** bcp's have been loaded)
+#
+echo "" >> ${LOG}
+date >> ${LOG}
+echo "Run allelecombinaseByModify" | tee -a ${LOG}
+${ALLCACHELOAD}/allelecombinationByModify.py -S${MGD_DBSERVER} -D${MGD_DBNAME} -U${MGD_DBUSER} -P${MGD_DBPASSWORDFILE} -K${CREATEDBYKEY} 2>&1 >> ${LOG}
+STAT=$?
+checkStatus ${STAT} "Run allelecombinaseByModify: genotypeload.py"
 
 #
 # run postload cleanup and email logs

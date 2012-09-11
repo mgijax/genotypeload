@@ -147,6 +147,7 @@ mgiTypeKey = 12		# ACC_MGIType._MGIType_key for Genotype
 strainTypeKey = 10      # ACC_MGIType._MGIType_key for Strain
 alleleTypeKey = 11      # ACC_MGIType._MGIType_key for Allele
 mgiPrefix = "MGI:"
+createdByKey = 1001
 
 loaddate = loadlib.loaddate
 
@@ -342,7 +343,7 @@ def bcpFiles():
 
 def processFile():
 
-    global genotypeKey, allelepairKey, accKey, noteKey, mgiKey
+    global genotypeKey, allelepairKey, accKey, noteKey, mgiKey, createdByKey
 
     lineNum = 0
     # For each line in the input file
@@ -392,7 +393,7 @@ def processFile():
 	allele1Key = loadlib.verifyObject(allele1ID, alleleTypeKey, None, lineNum, errorFile)
 
 	# allele2 key
-	if allele2ID == 0:
+	if len(allele2ID) > 0:
 	    allele2Key = loadlib.verifyObject(allele2ID, alleleTypeKey, None, lineNum, errorFile)
         else:
 	    allele2Key = ''
