@@ -101,7 +101,7 @@ mode = os.environ['GENOTYPEMODE']
 inputFileName = os.environ['GENOTYPE_INPUT_FILE']
 outputDir = os.environ['OUTPUTDIR']
 
-alleleCombination = os.environ['ALLCACHELOAD}'] + '/allelecombinationByGenotype.py' + \
+alleleCombination = os.environ['ALLCACHELOAD'] + '/allelecombinationByGenotype.py' + \
 		' -S' + os.environ['MGD_DBSERVER'] + \
 		' -D' + os.environ['MGD_DBNAME'] + \
 		' -U' + os.environ['MGD_DBUSER'] + \
