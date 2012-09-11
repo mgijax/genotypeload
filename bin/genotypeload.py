@@ -101,6 +101,13 @@ mode = os.environ['GENOTYPEMODE']
 inputFileName = os.environ['GENOTYPE_INPUT_FILE']
 outputDir = os.environ['OUTPUTDIR']
 
+alleleCombination = os.environ['ALLCACHELOAD}'] + '/allelecombinationByGenotype.py' + \
+		' -S' + os.environ['MGD_DBSERVER'] + \
+		' -D' + os.environ['MGD_DBNAME'] + \
+		' -U' + os.environ['MGD_DBUSER'] + \
+		' -P' + os.environ['MGD_DBPASSWORDFILE' + \
+		' -K%s\n'
+
 DEBUG = 0		# if 0, not in debug mode
 TAB = '\t'		# tab
 CRT = '\n'		# carriage return/newline
@@ -147,7 +154,8 @@ mgiTypeKey = 12		# ACC_MGIType._MGIType_key for Genotype
 strainTypeKey = 10      # ACC_MGIType._MGIType_key for Strain
 alleleTypeKey = 11      # ACC_MGIType._MGIType_key for Allele
 mgiPrefix = "MGI:"
-createdByKey = 1001
+
+runAlleleCombination = None	# run the alleleCombinationByGenotype for each genotype added
 
 loaddate = loadlib.loaddate
 
@@ -333,6 +341,9 @@ def bcpFiles():
 	diagFile.write('%s\n' % bcpCmd)
 	os.system(bcpCmd)
 
+    # run alleleCombination for each genotype added
+    os.system(runAlleleCombination)
+
     return
 
 # Purpose:  processes data
@@ -343,7 +354,8 @@ def bcpFiles():
 
 def processFile():
 
-    global genotypeKey, allelepairKey, accKey, noteKey, mgiKey, createdByKey
+    global genotypeKey, allelepairKey, accKey, noteKey, mgiKey
+    global runAlleleCombination
 
     lineNum = 0
     # For each line in the input file
@@ -378,8 +390,8 @@ def processFile():
 	# this signifies that this genotype already exists in the system
 
 	if len(genotypeID) > 0:
-            newGenotypeFile.write('%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' % (\
-	        genotypeID, strainID, strainName, markerID, allele1ID, allele2ID, conditional, \
+            newGenotypeFile.write('%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' % (\
+	        genotypeOrder, genotypeID, strainID, strainName, markerID, allele1ID, allele2ID, conditional, \
 	        existsAs, generalNote, privateNote, pairState, pairCompound, createdBy))
 	    continue
 
@@ -450,9 +462,13 @@ def processFile():
 	# Print out a new text file and attach the new MGI Allele IDs as the last field
 
 	genotypeID = mgiPrefix + str(mgiKey)
+
         newGenotypeFile.write('%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' % (\
 	    genotypeOrder, genotypeID, strainID, strainName, markerID, allele1ID, allele2ID, conditional, \
 	    existsAs, generalNote, privateNote, pairState, pairCompound, createdBy))
+
+	# call allele-combinatin re-fresh for this genotype
+	runAlleleCombination = runAlleleCombination + alleleCombination % (genotypeKey)
 
         accKey = accKey + 1
         mgiKey = mgiKey + 1
