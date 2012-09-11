@@ -19,7 +19,8 @@
 #	MGD_DBUSER
 #	MGD_DBPASSWORDFILE
 #	GENOTYPE_INPUT_FILE
-#	GENOTYPEMODE
+#	GENOTYPELOAD_CACHE_ADMIN
+#	GENOTYPELOAD_MODE
 #	OUTPUTDIR
 #
 # Inputs:
@@ -48,10 +49,10 @@
 # To add at a later date: Images (use imageload)
 #
 # Postprocessing:
-#	exec GXD_orderAllelePairs 
-#	exec GXD_orderGenotypesAll (GXD_AlleleGenotype cache)
-#	allele combination ('allelecombination.csh') (done)
-#	OMIM cache
+#	exec GXD_orderAllelePairs : no necessary since we will order as part of this load
+#	exec GXD_orderGenotypesAll (GXD_AlleleGenotype cache): done
+#	allele combination ('allelecombination.csh'): done
+#	OMIM cache: not done
 #
 # Outputs:
 #
@@ -97,16 +98,23 @@ import loadlib
 #
 user = os.environ['MGD_DBUSER']
 passwordFileName = os.environ['MGD_DBPASSWORDFILE']
-mode = os.environ['GENOTYPEMODE']
+doCacheAdmin = os.environ['GENOTYPELOAD_CACHE_ADMIN']
+mode = os.environ['GENOTYPELOAD_MODE']
 inputFileName = os.environ['GENOTYPE_INPUT_FILE']
 outputDir = os.environ['OUTPUTDIR']
 
+accSetMax = 'exec ACC_setMax %d'
+
+# this stored-procedure sets the GXD_AlleleGenotype information of a given genotype (delete/reload)
+orderGenotypes = 'exec GXD_orderGenotypesAll %d'
+
+# this product sets the MGI_Note/MGI_NoteChunk information
 alleleCombination = os.environ['ALLCACHELOAD'] + '/allelecombinationByGenotype.py' + \
 		' -S' + os.environ['MGD_DBSERVER'] + \
 		' -D' + os.environ['MGD_DBNAME'] + \
 		' -U' + os.environ['MGD_DBUSER'] + \
 		' -P' + os.environ['MGD_DBPASSWORDFILE'] + \
-		' -K%s\n'
+		' -K%d\n'
 
 DEBUG = 0		# if 0, not in debug mode
 TAB = '\t'		# tab
@@ -118,12 +126,14 @@ diagFile = ''		# diagnostic file descriptor
 errorFile = ''		# error file descriptor
 inputFile = ''		# file descriptor
 genotypeFile = ''       # file descriptor
+genotypeCacheFile = ''	# file descriptor
 allelepairFile = ''	# file descriptor
 accFile = ''            # file descriptor
 noteFile = ''		# file descriptor
 noteChunkFile = ''	# file descriptor
 
 genotypeTable = 'GXD_Genotype'
+genotypeCacheTable = 'GXD_AlleleGenotype'
 allelepairTable = 'GXD_AllelePair'
 accTable = 'ACC_Accession'
 noteTable = 'MGI_Note'
@@ -131,6 +141,7 @@ noteChunkTable = 'MGI_NoteChunk'
 newGenotypeFile = 'newGenotype.txt'
 
 genotypeFileName = outputDir + '/' + genotypeTable + '.bcp'
+genotypeCacheFileName = outputDir + '/' + genotypeCacheTable + '.bcp'
 allelepairFileName = outputDir + '/' + allelepairTable + '.bcp'
 accFileName = outputDir + '/' + accTable + '.bcp'
 noteFileName = outputDir + '/' + noteTable + '.bcp'
@@ -155,7 +166,7 @@ strainTypeKey = 10      # ACC_MGIType._MGIType_key for Strain
 alleleTypeKey = 11      # ACC_MGIType._MGIType_key for Allele
 mgiPrefix = "MGI:"
 
-runAlleleCombination = ''	# run the alleleCombinationByGenotype for each genotype added
+runAlleleCombination = []
 
 loaddate = loadlib.loaddate
 
@@ -194,7 +205,7 @@ def exit(
 
 def init():
     global diagFile, errorFile, inputFile, errorFileName, diagFileName
-    global genotypeFile, allelepairFile
+    global genotypeFile, genotypeCacheFile, allelepairFile
     global accFile, noteFile, noteChunkFile
     global newGenotypeFile
  
@@ -226,6 +237,11 @@ def init():
         genotypeFile = open(genotypeFileName, 'w')
     except:
         exit(1, 'Could not open file %s\n' % genotypeFileName)
+
+    try:
+        genotypeCacheFile = open(genotypeCacheFileName, 'w')
+    except:
+        exit(1, 'Could not open file %s\n' % genotypeCacheFileName)
 
     try:
         allelepairFile = open(allelepairFileName, 'w')
@@ -323,6 +339,7 @@ def bcpFiles():
         return
 
     genotypeFile.close()
+    genotypeCacheFile.close()
     allelepairFile.close()
     accFile.close()
     noteFile.close()
@@ -332,17 +349,19 @@ def bcpFiles():
     bcpII = '-c -t\"|" -S%s -U%s' % (db.get_sqlServer(), db.get_sqlUser())
 
     bcp1 = '%s%s in %s %s' % (bcpI, genotypeTable, genotypeFileName, bcpII)
-    bcp2 = '%s%s in %s %s' % (bcpI, allelepairTable, allelepairFileName, bcpII)
-    bcp3 = '%s%s in %s %s' % (bcpI, accTable, accFileName, bcpII)
-    bcp4 = '%s%s in %s %s' % (bcpI, noteTable, noteFileName, bcpII)
-    bcp5 = '%s%s in %s %s' % (bcpI, noteChunkTable, noteChunkFileName, bcpII)
+    bcp2 = '%s%s in %s %s' % (bcpI, genotypeCacheTable, genotypeCacheFileName, bcpII)
+    bcp3 = '%s%s in %s %s' % (bcpI, allelepairTable, allelepairFileName, bcpII)
+    bcp4 = '%s%s in %s %s' % (bcpI, accTable, accFileName, bcpII)
+    bcp5 = '%s%s in %s %s' % (bcpI, noteTable, noteFileName, bcpII)
+    bcp6 = '%s%s in %s %s' % (bcpI, noteChunkTable, noteChunkFileName, bcpII)
 
-    for bcpCmd in [bcp1, bcp2, bcp3, bcp4, bcp5]:
+    for bcpCmd in [bcp1, bcp2, bcp3, bcp4, bcp5, bcp6]:
 	diagFile.write('%s\n' % bcpCmd)
 	os.system(bcpCmd)
 
     # run alleleCombination for each genotype added
-    os.system(runAlleleCombination)
+    if doCacheAdmin:
+        os.system(''.join(runAlleleCombination))
 
     return
 
@@ -448,6 +467,10 @@ def processFile():
             % (genotypeKey, strainKey, conditionalKey, existsAsKey, \
 	    createdByKey, createdByKey, loaddate, loaddate))
 
+        genotypeCacheFile.write('%s|%s|%s|1|%s|%s|%s|%s\n' \
+            % (genotypeKey, markerKey, allele1Key, \
+	    createdByKey, createdByKey, loaddate, loaddate))
+
         allelepairFile.write('%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s\n' \
 	    % (allelepairKey, genotypeKey, allele1Key, allele2Key, markerKey, \
 	       pairStateKey, pairCompundKey, sequenceNum, \
@@ -468,7 +491,8 @@ def processFile():
 	    existsAs, generalNote, privateNote, pairState, pairCompound, createdBy))
 
 	# call allele-combinatin re-fresh for this genotype
-	runAlleleCombination = runAlleleCombination + alleleCombination % (str(genotypeKey))
+        if doCacheAdmin:
+	    runAlleleCombination.append(alleleCombination % (genotypeKey))
 
         accKey = accKey + 1
         mgiKey = mgiKey + 1
@@ -482,7 +506,7 @@ def processFile():
     #
 
     if not DEBUG:
-        db.sql('exec ACC_setMax %d' % (lineNum), None)
+        db.sql(accSetMax % (lineNum), None)
 
 #
 # Main
