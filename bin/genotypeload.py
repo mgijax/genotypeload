@@ -50,7 +50,7 @@
 # Postprocessing:
 #	exec GXD_orderAllelePairs 
 #	exec GXD_orderGenotypesAll (GXD_AlleleGenotype cache)
-#	allele combination ('allelecombination.csh')
+#	allele combination ('allelecombination.csh') (done)
 #	OMIM cache
 #
 # Outputs:
@@ -105,7 +105,7 @@ alleleCombination = os.environ['ALLCACHELOAD'] + '/allelecombinationByGenotype.p
 		' -S' + os.environ['MGD_DBSERVER'] + \
 		' -D' + os.environ['MGD_DBNAME'] + \
 		' -U' + os.environ['MGD_DBUSER'] + \
-		' -P' + os.environ['MGD_DBPASSWORDFILE' + \
+		' -P' + os.environ['MGD_DBPASSWORDFILE'] + \
 		' -K%s\n'
 
 DEBUG = 0		# if 0, not in debug mode
