@@ -77,7 +77,10 @@ fi
 #
 # createArchive
 #
-preload ${OUTPUTDIR}
+if [ ${GENOTYPELOAD_STANDALONE} = 1 ]
+then
+    preload ${OUTPUTDIR}
+fi
 
 #
 # Establish the log file.
@@ -103,5 +106,9 @@ checkStatus ${STAT} "Call genotypeload.py"
 #
 # run postload cleanup and email logs
 #
-shutDown
+if [ ${GENOTYPELOAD_STANDALONE} = 1 ]
+then
+    shutDown
+fi
+
 exit 0

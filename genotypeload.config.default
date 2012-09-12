@@ -40,7 +40,7 @@ OUTPUTDIR=${FILEDIR}/output
 
 # directory where input files are created by genotypeload.py
 INPUTDIR=${FILEDIR}/input
-INFILE_NAME=${INPUTDIR}/mgi_genotype_input.tsv
+INFILE_NAME=${INPUTDIR}/?
 
 export FILEDIR ARCHIVEDIR LOGDIR RPTDIR OUTPUTDIR INPUTDIR INFILE_NAME
 
@@ -62,10 +62,18 @@ JOBSTREAM=genotypeload
 export JOBSTREAM
 
 # Genotype load
-#GENOTYPEMODE=preview
-GENOTYPEMODE=load
+#
+# is this call a stand-alone or is it being called from another product?
+GENOTYPELOAD_STANDALONE=1
+# turn-on (1) if you want to run the cache-ing (allelecombination), else turn-off (0)
+# these caches are handled by nightly/weekly tasks and do not need to run if those tasks are going to run
+GENOTYPELOAD_CACHE_ADMIN=1
+# run in 'load' mode (default)
+GENOTYPELOAD_MODE=load
+# new genotype file (output from genotypeload)
+GENOTYPELOAD_OUTPUT=${INPUTDIR}/?
 
-export GENOTYPEMODE
+export GENOTYPELOAD_STANDALONE GENOTYPELOAD_CACHE_ADMIN GENOTYPELOAD_MODE GENOTYPELOAD_OUTPUT
 
 ###########################################################################
 #
