@@ -19,6 +19,7 @@
 #	MGD_DBUSER
 #	MGD_DBPASSWORDFILE
 #	GENOTYPE_INPUT_FILE
+#	GENOTYPELOAD_OUTPUT
 #	GENOTYPELOAD_CACHE_ADMIN
 #	GENOTYPELOAD_MODE
 #	OUTPUTDIR
@@ -146,7 +147,7 @@ allelepairFileName = outputDir + '/' + allelepairTable + '.bcp'
 accFileName = outputDir + '/' + accTable + '.bcp'
 noteFileName = outputDir + '/' + noteTable + '.bcp'
 noteChunkFileName = outputDir + '/' + noteChunkTable + '.bcp'
-genotypeOutputName = outputDir + '/' + genotypeOutput
+genotypeOutputName = genotypeOutput
 
 diagFileName = ''	# diagnostic file name
 errorFileName = ''	# error file name
