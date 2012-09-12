@@ -77,15 +77,18 @@ fi
 #
 # createArchive
 #
-#preload ${OUTPUTDIR}
+preload ${OUTPUTDIR}
 
 #
 # Establish the log file.
 #
 LOG=${LOG_DIAG}
-# don't rm and re-fresh the log; assuming that this is being called from another product
-#rm -rf ${LOG}
-#touch ${LOG}
+
+if [ ${GENOTYPELOAD_STANDALONE} = 1 ]
+then
+    rm -rf ${LOG}
+    touch ${LOG}
+fi
 
 #
 # Load Genotype file
@@ -100,5 +103,5 @@ checkStatus ${STAT} "Call genotypeload.py"
 #
 # run postload cleanup and email logs
 #
-#shutDown
+shutDown
 exit 0
