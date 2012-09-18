@@ -134,20 +134,20 @@ accFile = ''            # file descriptor
 noteFile = ''		# file descriptor
 noteChunkFile = ''	# file descriptor
 
-genotypeTable = 'GXD_Genotype'
-genotypeCacheTable = 'GXD_AlleleGenotype'
-allelepairTable = 'GXD_AllelePair'
-accTable = 'ACC_Accession'
-noteTable = 'MGI_Note'
-noteChunkTable = 'MGI_NoteChunk'
+genotypeTable = ''	# table name
+genotypeCacheTable = ''	# table name
+allelepairTable = ''	# table name
+accTable = ''		# table name
+noteTable = ''		# table name
+noteChunkTable = ''	# table name
 
-genotypeFileName = outputDir + '/' + genotypeTable + '.bcp'
-genotypeCacheFileName = outputDir + '/' + genotypeCacheTable + '.bcp'
-allelepairFileName = outputDir + '/' + allelepairTable + '.bcp'
-accFileName = outputDir + '/' + accTable + '.bcp'
-noteFileName = outputDir + '/' + noteTable + '.bcp'
-noteChunkFileName = outputDir + '/' + noteChunkTable + '.bcp'
-genotypeOutputName = genotypeOutput
+genotypeFileName = ''	# bcp file
+genotypeCacheFileName = ''	# bcp file
+allelepairFileName = ''	# bcp file
+accFileName = ''	# bcp file
+noteFileName = ''	# bcp file
+noteChunkFileName = ''	# bcp file
+genotypeOutputName = ''	# output file name
 
 diagFileName = ''	# diagnostic file name
 errorFileName = ''	# error file name
@@ -209,6 +209,12 @@ def init():
     global genotypeFile, genotypeCacheFile, allelepairFile
     global accFile, noteFile, noteChunkFile
     global genotypeOutput
+
+    global genotypeTable, genotypeCacheTable, allelepairTable
+    global accTable, noteTable, noteChunkTable
+
+    global genotypeFileName, genotypeCacheFileName, allelepairFileName
+    global accFileName, noteFileName, noteChunkFileName, genotypeOutputName
  
     db.useOneConnection(1)
     db.set_sqlUser(user)
@@ -216,8 +222,22 @@ def init():
  
     head, tail = os.path.split(inputFileName) 
 
+    genotypeTable = '.GXD_Genotype'
+    genotypeCacheTable = '.GXD_AlleleGenotype'
+    allelepairTable = '.GXD_AllelePair'
+    accTable = '.ACC_Accession'
+    noteTable = '.MGI_Note'
+    noteChunkTable = '.MGI_NoteChunk'
+
     diagFileName = outputDir + '/' + tail + '.diagnostics'
     errorFileName = outputDir + '/' + tail + '.error'
+    genotypeFileName = outputDir + '/' + tail + genotypeTable + '.bcp'
+    genotypeCacheFileName = outputDir + '/' + tail + genotypeCacheTable + '.bcp'
+    allelepairFileName = outputDir + '/' + tail + allelepairTable + '.bcp'
+    accFileName = outputDir + '/' + tail + accTable + '.bcp'
+    noteFileName = outputDir + '/' + tail + noteTable + '.bcp'
+    noteChunkFileName = outputDir + '/' + tail + noteChunkTable + '.bcp'
+    genotypeOutputName = genotypeOutput
 
     try:
         diagFile = open(diagFileName, 'w')
