@@ -171,6 +171,8 @@ runAlleleCombination = []
 
 loaddate = loadlib.loaddate
 
+skipBCP = 1		# does the BCP file load need to be skipped?
+
 # Purpose: prints error message and exits
 # Returns: nothing
 # Assumes: nothing
@@ -204,7 +206,7 @@ def exit(
 #          exits if files cannot be opened
 # Throws: nothing
 
-def init():
+def initialize():
     global diagFile, errorFile, inputFile, errorFileName, diagFileName
     global genotypeFile, genotypeCacheFile, allelepairFile
     global accFile, noteFile, noteChunkFile
@@ -358,6 +360,9 @@ def bcpFiles():
 
     if DEBUG or not bcpon:
         return
+
+    if skipBCP:
+	return
 
     genotypeFile.close()
     genotypeCacheFile.close()
@@ -520,6 +525,9 @@ def processFile():
 	allelepairKey = allelepairKey + 1
         genotypeKey = genotypeKey + 1
 
+	# don't skip the bcp file loading...data exists that needs to be loaded
+	skipBCP = 0	
+
     #	end of "for line in inputFile.readlines():"
 
     #
@@ -533,10 +541,20 @@ def processFile():
 # Main
 #
 
-init()
-verifyMode()
-setPrimaryKeys()
-processFile()
-bcpFiles()
+if initialize() != 0:
+    exit(1)
+
+if verifyMode() != 0:
+    exit(1)
+
+if setPrimaryKeys() != 0:
+    exit(1)
+
+if processFile() != 0:
+    exit(1)
+
+if bcpFiles() != 0:
+    exit(1)
+
 exit(0)
 
