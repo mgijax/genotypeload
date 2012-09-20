@@ -363,10 +363,10 @@ def bcpFiles():
     bcpdelim = "|"
 
     if DEBUG or not bcpon:
-        return
+        return 0
 
     if skipBCP:
-	return
+	return 0
 
     genotypeFile.close()
     genotypeCacheFile.close()
@@ -405,6 +405,7 @@ def processFile():
 
     global genotypeKey, allelepairKey, accKey, noteKey, mgiKey
     global runAlleleCombination
+    global skipBCP
 
     lineNum = 0
     # For each line in the input file
@@ -538,7 +539,7 @@ def processFile():
     # Update the AccessionMax value
     #
 
-    if not DEBUG:
+    if not DEBUG and not skipBCP:
         db.sql(accSetMax % (lineNum), None)
 
     return 0
