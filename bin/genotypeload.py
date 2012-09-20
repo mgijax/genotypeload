@@ -303,7 +303,7 @@ def initialize():
 
     errorFile.write('Start Date/Time: %s\n\n' % (mgi_utils.date()))
 
-    return
+    return 0
 
 # Purpose: verify processing mode
 # Returns: nothing
@@ -321,6 +321,8 @@ def verifyMode():
         bcpon = 0
     elif mode != 'load':
         exit(1, 'Invalid Processing Mode:  %s\n' % (mode))
+
+    return 0
 
 # Purpose:  sets global primary key variables
 # Returns:  nothing
@@ -347,6 +349,8 @@ def setPrimaryKeys():
     results = db.sql('select maxKey = maxNumericPart + 1 from ACC_AccessionMax ' + \
         'where prefixPart = "%s"' % (mgiPrefix), 'auto')
     mgiKey = results[0]['maxKey']
+
+    return 0
 
 # Purpose:  BCPs the data into the database
 # Returns:  nothing
@@ -389,7 +393,7 @@ def bcpFiles():
     if doCacheAdmin:
         os.system(''.join(runAlleleCombination))
 
-    return
+    return 0
 
 # Purpose:  processes data
 # Returns:  nothing
@@ -536,6 +540,8 @@ def processFile():
 
     if not DEBUG:
         db.sql(accSetMax % (lineNum), None)
+
+    return 0
 
 #
 # Main
