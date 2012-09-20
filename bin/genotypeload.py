@@ -223,16 +223,17 @@ def initialize():
     db.set_sqlPasswordFromFile(passwordFileName)
  
     head, tail = os.path.split(inputFileName) 
+    tail = tail + '.'
 
-    genotypeTable = '.GXD_Genotype'
-    genotypeCacheTable = '.GXD_AlleleGenotype'
-    allelepairTable = '.GXD_AllelePair'
-    accTable = '.ACC_Accession'
-    noteTable = '.MGI_Note'
-    noteChunkTable = '.MGI_NoteChunk'
+    genotypeTable = 'GXD_Genotype'
+    genotypeCacheTable = 'GXD_AlleleGenotype'
+    allelepairTable = 'GXD_AllelePair'
+    accTable = 'ACC_Accession'
+    noteTable = 'MGI_Note'
+    noteChunkTable = 'MGI_NoteChunk'
 
-    diagFileName = outputDir + '/' + tail + '.diagnostics'
-    errorFileName = outputDir + '/' + tail + '.error'
+    diagFileName = outputDir + '/' + tail + 'diagnostics'
+    errorFileName = outputDir + '/' + tail + 'error'
     genotypeFileName = outputDir + '/' + tail + genotypeTable + '.bcp'
     genotypeCacheFileName = outputDir + '/' + tail + genotypeCacheTable + '.bcp'
     allelepairFileName = outputDir + '/' + tail + allelepairTable + '.bcp'
