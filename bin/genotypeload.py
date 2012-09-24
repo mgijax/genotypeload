@@ -392,6 +392,7 @@ def bcpFiles():
 
     # run alleleCombination for each genotype added
     if doCacheAdmin:
+	diagFile.write('%s\n' % runAlleleCombination)
         os.system(''.join(runAlleleCombination))
 
     return 0
