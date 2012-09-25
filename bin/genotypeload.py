@@ -391,7 +391,7 @@ def bcpFiles():
 	os.system(bcpCmd)
 
     # run alleleCombination for each genotype added
-    if doCacheAdmin:
+    if doCacheAdmin == 1:
 	diagFile.write('%s\n' % runAlleleCombination)
         os.system(''.join(runAlleleCombination))
 
@@ -524,7 +524,7 @@ def processFile():
 	    existsAs, generalNote, privateNote, pairState, pairCompound, createdBy))
 
 	# call allele-combinatin re-fresh for this genotype
-        if doCacheAdmin:
+        if doCacheAdmin == 1:
 	    runAlleleCombination.append(alleleCombination % (genotypeKey))
 
         accKey = accKey + 1
