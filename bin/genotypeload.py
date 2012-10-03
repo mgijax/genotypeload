@@ -34,14 +34,16 @@
 #	field 4:  Strain Name
 #	field 5:  MGI Marker ID
 #	field 6:  Allele 1 ID
-#	field 7:  Allele 2 ID
-#	field 8:  Conditional (yes/no)
-#	field 9:  Exist As Term (ex. 'Mouse Line', 'Cell Line', 'Chimeric')
-#	field 10: General Notes (ex. 1027)
-#	field 11: Private Notes (ex. 1028)
-#	field 12: Pair State (ex. 'Homozygous', 'Hemizygous X-linked', etc.)
-#	field 13: Compound (ex. 'Top', 'Bottom', 'Not Applicable'
-#	field 14: Created By User
+#	field 7:  Mutant Cell Line 1
+#	field 8:  Allele 2 ID
+#	field 9:  Mutant Cell Line 2
+#	field 10: Conditional (yes/no)
+#	field 11: Exist As Term (ex. 'Mouse Line', 'Cell Line', 'Chimeric')
+#	field 12: General Notes (ex. 1027)
+#	field 13: Private Notes (ex. 1028)
+#	field 14: Pair State (ex. 'Homozygous', 'Hemizygous X-linked', etc.)
+#	field 15: Compound (ex. 'Top', 'Bottom', 'Not Applicable'
+#	field 16: Created By User
 #
 # This assumes only one allele pair
 # Once more than one allele pair is needed, revisions will need to be made
@@ -91,6 +93,7 @@ import os
 import db
 import mgi_utils
 import loadlib
+import alleleloadlib
 
 #globals
 
@@ -427,14 +430,16 @@ def processFile():
 	    strainName = tokens[3]
 	    markerID = tokens[4]
 	    allele1ID = tokens[5]
-	    allele2ID = tokens[6]
-	    conditional = tokens[7]
-	    existsAs = tokens[8]
-	    generalNote = tokens[9]
-	    privateNote = tokens[10]
-	    pairState = tokens[11]
-	    pairCompound = tokens[12]
-	    createdBy = tokens[13]
+	    mutant1ID = tokens[6]
+	    allele2ID = tokens[7]
+	    mutant2ID = tokens[8]
+	    conditional = tokens[9]
+	    existsAs = tokens[10]
+	    generalNote = tokens[11]
+	    privateNote = tokens[12]
+	    pairState = tokens[13]
+	    pairCompound = tokens[14]
+	    createdBy = tokens[15]
         except:
             exit(1, 'Invalid Line (%d): %s\n' % (lineNum, line))
 
@@ -456,11 +461,23 @@ def processFile():
 	# allele1 key
 	allele1Key = loadlib.verifyObject(allele1ID, alleleTypeKey, None, lineNum, errorFile)
 
+	# mutant1 key
+	if len(mutant1ID) > 0:
+	    mutant1Key = alleleloadlib.verifyMutnatCellLine(mutant1ID, lineNum, errorFile)
+	else:
+	    mutant1Key = ''
+
 	# allele2 key
 	if len(allele2ID) > 0:
 	    allele2Key = loadlib.verifyObject(allele2ID, alleleTypeKey, None, lineNum, errorFile)
         else:
 	    allele2Key = ''
+
+	# mutant2 key
+	if len(mutant2ID) > 0:
+	    mutant2Key = alleleloadlib.verifyMutnatCellLine(mutant2ID, lineNum, errorFile)
+	else:
+	    mutant2Key = ''
 
 	if conditional == 'yes':
 	    conditionalKey = 1
@@ -504,8 +521,9 @@ def processFile():
             % (genotypeKey, markerKey, allele1Key, \
 	    createdByKey, createdByKey, loaddate, loaddate))
 
-        allelepairFile.write('%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s\n' \
+        allelepairFile.write('%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s\n' \
 	    % (allelepairKey, genotypeKey, allele1Key, allele2Key, markerKey, \
+	       mutant1Key, mutant2Key, \
 	       pairStateKey, pairCompundKey, sequenceNum, \
 	       createdByKey, createdByKey, loaddate, loaddate))
 
