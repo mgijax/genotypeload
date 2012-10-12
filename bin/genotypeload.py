@@ -20,7 +20,6 @@
 #	MGD_DBPASSWORDFILE
 #	GENOTYPE_INPUT_FILE
 #	GENOTYPELOAD_OUTPUT
-#	GENOTYPELOAD_CACHE_ADMIN
 #	GENOTYPELOAD_MODE
 #	OUTPUTDIR
 #
@@ -102,7 +101,6 @@ import alleleloadlib
 #
 user = os.environ['MGD_DBUSER']
 passwordFileName = os.environ['MGD_DBPASSWORDFILE']
-doCacheAdmin = os.environ['GENOTYPELOAD_CACHE_ADMIN']
 mode = os.environ['GENOTYPELOAD_MODE']
 inputFileName = os.environ['GENOTYPE_INPUT_FILE']
 outputDir = os.environ['OUTPUTDIR']
@@ -394,9 +392,8 @@ def bcpFiles():
 	os.system(bcpCmd)
 
     # run alleleCombination for each genotype added
-    if doCacheAdmin == 1:
-	diagFile.write('%s\n' % runAlleleCombination)
-        os.system(''.join(runAlleleCombination))
+    diagFile.write('%s\n' % runAlleleCombination)
+    os.system(''.join(runAlleleCombination))
 
     return 0
 
@@ -542,8 +539,7 @@ def processFile():
 	    existsAs, generalNote, privateNote, pairState, pairCompound, createdBy))
 
 	# call allele-combinatin re-fresh for this genotype
-        if doCacheAdmin == 1:
-	    runAlleleCombination.append(alleleCombination % (genotypeKey))
+	runAlleleCombination.append(alleleCombination % (genotypeKey))
 
         accKey = accKey + 1
         mgiKey = mgiKey + 1

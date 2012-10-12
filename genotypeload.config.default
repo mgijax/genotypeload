@@ -65,9 +65,6 @@ export JOBSTREAM
 #
 # is this call a stand-alone or is it being called from another product?
 GENOTYPELOAD_STANDALONE=1
-# turn-on (1) if you want to run the cache-ing (allelecombination), else turn-off (0)
-# these caches are handled by nightly/weekly tasks and do not need to run if those tasks are going to run
-GENOTYPELOAD_CACHE_ADMIN=1
 # run in 'load' mode (default)
 GENOTYPELOAD_MODE=load
 # new genotype file (output from genotypeload)
