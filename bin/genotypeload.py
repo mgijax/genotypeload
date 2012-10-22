@@ -44,11 +44,8 @@
 #	field 15: Compound (ex. 'Top', 'Bottom', 'Not Applicable'
 #	field 16: Created By User
 #
-# This assumes only one allele pair
-# Once more than one allele pair is needed, revisions will need to be made
-# GXD_Genotype.note field exist but has never been used and is always null.
-# _MGIType_key = 12
-# To add at a later date: Images (use imageload)
+# 1) GXD_Genotype.note field exist but has never been used and is always null.
+# 2) To add at a later date: Images (use imageload)
 #
 # Postprocessing:
 #	exec GXD_orderAllelePairs : no necessary since we will order as part of this load
@@ -336,19 +333,19 @@ def setPrimaryKeys():
 
     global genotypeKey, allelepairKey, accKey, noteKey, mgiKey
 
-    results = db.sql('select maxKey = max(_Genotype_key) + 1 from GXD_Genotype', 'auto')
+    results = db.sql('select maxKey = max(_Genotype_key) from GXD_Genotype', 'auto')
     genotypeKey = results[0]['maxKey']
 
-    results = db.sql('select maxKey = max(_AllelePair_key) + 1 from GXD_AllelePair', 'auto')
+    results = db.sql('select maxKey = max(_AllelePair_key) from GXD_AllelePair', 'auto')
     allelepairKey = results[0]['maxKey']
 
-    results = db.sql('select maxKey = max(_Accession_key) + 1 from ACC_Accession', 'auto')
+    results = db.sql('select maxKey = max(_Accession_key) from ACC_Accession', 'auto')
     accKey = results[0]['maxKey']
 
-    results = db.sql('select maxKey = max(_Note_key) + 1 from MGI_Note', 'auto')
+    results = db.sql('select maxKey = max(_Note_key) from MGI_Note', 'auto')
     noteKey = results[0]['maxKey']
 
-    results = db.sql('select maxKey = maxNumericPart + 1 from ACC_AccessionMax ' + \
+    results = db.sql('select maxKey = maxNumericPart from ACC_AccessionMax ' + \
         'where prefixPart = "%s"' % (mgiPrefix), 'auto')
     mgiKey = results[0]['maxKey']
 
@@ -409,6 +406,9 @@ def processFile():
     global runAlleleCombination
     global skipBCP
 
+    nextGenotype = 0
+    prevGenotypeOrder = 0
+    sequenceNum = 1
     lineNum = 0
     # For each line in the input file
 
@@ -501,33 +501,49 @@ def processFile():
 		or createdByKey == 0:
 	    error = 1
 
-	# this tag only supports one allele pair per genotype
-	sequenceNum = 1
-
         # if errors, continue to next record
         if error:
             continue
 
+	# same genotype order...same genotype/multiple allele pairs
+	if genotypeOrder == prevGenotypeOrder:
+	    nextGenotype = 0
+	    sequenceNum = sequenceNum + 1
+	# different genotype order...single allele pair
+        else:
+	    nextGenotype = 1
+	    sequenceNum = 1
+
         # if no errors, process the allele
 
-        genotypeFile.write('%s|%s|%s||%s|%s|%s|%s|%s\n' \
-            % (genotypeKey, strainKey, conditionalKey, existsAsKey, \
-	    createdByKey, createdByKey, loaddate, loaddate))
+	if nextGenotype:
 
-        genotypeCacheFile.write('%s|%s|%s|1|%s|%s|%s|%s\n' \
-            % (genotypeKey, markerKey, allele1Key, \
-	    createdByKey, createdByKey, loaddate, loaddate))
+	    # increment 
+	    genotypeKey = genotypeKey + 1
+            mgiKey = mgiKey + 1
+            accKey = accKey + 1
 
+            genotypeFile.write('%s|%s|%s||%s|%s|%s|%s|%s\n' \
+                % (genotypeKey, strainKey, conditionalKey, existsAsKey, \
+	           createdByKey, createdByKey, loaddate, loaddate))
+
+            genotypeCacheFile.write('%s|%s|%s|1|%s|%s|%s|%s\n' \
+                % (genotypeKey, markerKey, allele1Key, \
+	        createdByKey, createdByKey, loaddate, loaddate))
+
+            # MGI Accession ID for the new genotype
+            accFile.write('%s|%s%d|%s|%s|1|%d|%d|0|1|%s|%s|%s|%s\n' \
+                % (accKey, mgiPrefix, mgiKey, mgiPrefix, mgiKey, genotypeKey, mgiTypeKey, \
+	           createdByKey, createdByKey, loaddate, loaddate))
+
+	    # call allele-combinatin re-fresh for this genotype
+	    runAlleleCombination.append(alleleCombination % (genotypeKey))
+
+	allelepairKey = allelepairKey + 1
         allelepairFile.write('%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s\n' \
 	    % (allelepairKey, genotypeKey, allele1Key, allele2Key, markerKey, \
 	       mutant1Key, mutant2Key, \
 	       pairStateKey, pairCompundKey, sequenceNum, \
-	       createdByKey, createdByKey, loaddate, loaddate))
-
-        # MGI Accession ID for the new genotype
-
-        accFile.write('%s|%s%d|%s|%s|1|%d|%d|0|1|%s|%s|%s|%s\n' \
-            % (accKey, mgiPrefix, mgiKey, mgiPrefix, mgiKey, genotypeKey, mgiTypeKey, \
 	       createdByKey, createdByKey, loaddate, loaddate))
 
 	# Print out a new text file and attach the new MGI Allele IDs as the last field
@@ -538,16 +554,11 @@ def processFile():
 	    genotypeOrder, genotypeID, strainID, strainName, markerID, allele1ID, allele2ID, conditional, \
 	    existsAs, generalNote, privateNote, pairState, pairCompound, createdBy))
 
-	# call allele-combinatin re-fresh for this genotype
-	runAlleleCombination.append(alleleCombination % (genotypeKey))
-
-        accKey = accKey + 1
-        mgiKey = mgiKey + 1
-	allelepairKey = allelepairKey + 1
-        genotypeKey = genotypeKey + 1
-
 	# don't skip the bcp file loading...data exists that needs to be loaded
 	skipBCP = 0	
+
+	# save previous genotypeOrder
+	prevGenotypeOrder = genotypeOrder
 
     #	end of "for line in inputFile.readlines():"
 
