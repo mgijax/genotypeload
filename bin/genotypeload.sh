@@ -104,6 +104,16 @@ STAT=$?
 checkStatus ${STAT} "Call genotypeload.py"
 
 #
+# Run OMIM load
+#
+echo "" >> ${LOG}
+date >> ${LOG}
+echo "Call mrkomim.csh" | tee -a ${LOG}
+${MRKCACHELOAD}/mrkomim.csh 2>&1 >> ${LOG}
+STAT=$?
+checkStatus ${STAT} "Call genotypeload.py"
+
+#
 # run postload cleanup and email logs
 #
 if [ ${GENOTYPELOAD_STANDALONE} = 1 ]
