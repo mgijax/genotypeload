@@ -104,8 +104,10 @@ STAT=$?
 checkStatus ${STAT} "Call genotypeload.py"
 
 #
+# these cache loads have been intentionally commented out - since this cache is run later on as part of weekly tasks
+# while testing, turn these cahe loads back on
+#
 # Run Allele Combination load
-# this has intentionally been commented out - since this cache is run later on as part of sunday tasks
 #
 #echo "" >> ${LOG}
 #date >> ${LOG}
@@ -113,10 +115,8 @@ checkStatus ${STAT} "Call genotypeload.py"
 #${ALLCACHELOAD}/allelecombination.csh
 #STAT=$?
 #checkStatus ${STAT} "Call genotypeload.py/allelecombination.csh"
-
 #
 # Run OMIM load
-# this has intentionally been commented out - since this cache is run later on as part of sunday tasks
 #
 #echo "" >> ${LOG}
 #date >> ${LOG}
