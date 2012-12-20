@@ -104,14 +104,26 @@ STAT=$?
 checkStatus ${STAT} "Call genotypeload.py"
 
 #
-# Run OMIM load
+# Run Allele Combination load
+# this has intentionally been commented out - since this cache is run later on as part of sunday tasks
 #
-echo "" >> ${LOG}
-date >> ${LOG}
-echo "Call mrkomim.csh" | tee -a ${LOG}
-${MRKCACHELOAD}/mrkomim.csh 2>&1 >> ${LOG}
-STAT=$?
-checkStatus ${STAT} "Call genotypeload.py"
+#echo "" >> ${LOG}
+#date >> ${LOG}
+#echo "Call allelecombination.csh" | tee -a ${LOG}
+#${ALLCACHELOAD}/allelecombination.csh
+#STAT=$?
+#checkStatus ${STAT} "Call genotypeload.py/allelecombination.csh"
+
+#
+# Run OMIM load
+# this has intentionally been commented out - since this cache is run later on as part of sunday tasks
+#
+#echo "" >> ${LOG}
+#date >> ${LOG}
+#echo "Call mrkomim.csh" | tee -a ${LOG}
+#${MRKCACHELOAD}/mrkomim.csh 2>&1 >> ${LOG}
+#STAT=$?
+#checkStatus ${STAT} "Call genotypeload.py/mrkomim.csh"
 
 #
 # run postload cleanup and email logs

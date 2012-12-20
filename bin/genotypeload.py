@@ -112,12 +112,13 @@ accSetMax = 'exec ACC_setMax %d'
 orderGenotypes = 'exec GXD_orderGenotypesMissing'
 
 # this product sets the MGI_Note/MGI_NoteChunk information
-alleleCombination = os.environ['ALLCACHELOAD'] + '/allelecombinationByGenotype.py' + \
-		' -S' + os.environ['MGD_DBSERVER'] + \
-		' -D' + os.environ['MGD_DBNAME'] + \
-		' -U' + os.environ['MGD_DBUSER'] + \
-		' -P' + os.environ['MGD_DBPASSWORDFILE'] + \
-		' -K%d\n'
+# this has been intentionally commented out - the entire cache is run from the wrapper
+#alleleCombination = os.environ['ALLCACHELOAD'] + '/allelecombinationByGenotype.py' + \
+#		' -S' + os.environ['MGD_DBSERVER'] + \
+#		' -D' + os.environ['MGD_DBNAME'] + \
+#		' -U' + os.environ['MGD_DBUSER'] + \
+#		' -P' + os.environ['MGD_DBPASSWORDFILE'] + \
+#		' -K%d\n'
 
 DEBUG = 0		# if 0, not in debug mode
 TAB = '\t'		# tab
@@ -382,9 +383,10 @@ def bcpFiles():
     # run allele/genotype cache
     db.sql(orderGenotypes, None)
 
+    # this has been intentionally commented out - the entire cache is run from the wrapper
     # run alleleCombination for each genotype added
-    diagFile.write('%s\n' % runAlleleCombination)
-    os.system(''.join(runAlleleCombination))
+    #diagFile.write('%s\n' % runAlleleCombination)
+    #os.system(''.join(runAlleleCombination))
 
     return 0
 
@@ -526,8 +528,9 @@ def processFile():
                 % (accKey, mgiPrefix, mgiKey, mgiPrefix, mgiKey, genotypeKey, mgiTypeKey, \
 	           createdByKey, createdByKey, loaddate, loaddate))
 
+            # this has been intentionally commented out - the entire cache is run from the wrapper
 	    # call allele-combinatin re-fresh for this genotype
-	    runAlleleCombination.append(alleleCombination % (genotypeKey))
+	    #runAlleleCombination.append(alleleCombination % (genotypeKey))
 
 	allelepairKey = allelepairKey + 1
         allelepairFile.write('%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s\n' \
