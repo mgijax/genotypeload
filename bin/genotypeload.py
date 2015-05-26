@@ -341,7 +341,6 @@ def setPrimaryKeys():
 
 def bcpFiles():
 
-    bcpdelim = "|"
 
     if DEBUG or not bcpon:
         return
@@ -358,7 +357,7 @@ def bcpFiles():
     bcpCommand = os.environ['PG_DBUTILS'] + '/bin/bcpin.csh'
 
     bcpI = '%s %s %s' % (bcpCommand, db.get_sqlServer(), db.get_sqlDatabase())
-    bcpII = '"\\t" "\\n" mgd'
+    bcpII = '"|" "\\n" mgd'
 
     bcp1 = '%s %s "/" %s %s' % (bcpI, genotypeTable, genotypeFileName, bcpII)
     bcp2 = '%s %s "/" %s %s' % (bcpI, allelepairTable, allelepairFileName, bcpII)
