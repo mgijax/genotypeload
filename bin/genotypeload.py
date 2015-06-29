@@ -105,11 +105,11 @@ inputFileName = os.environ['GENOTYPE_INPUT_FILE']
 outputDir = os.environ['OUTPUTDIR']
 genotypeOutput = os.environ['GENOTYPELOAD_OUTPUT']
 
-accSetMax = 'exec ACC_setMax %d'
+accSetMax = 'select * from  ACC_setMax(%d)'
 
 # this stored-procedure sets the GXD_AlleleGenotype information of
 # all genotypes that do not have data in the cache
-orderGenotypes = 'exec GXD_orderGenotypesMissing'
+orderGenotypes = 'select * from GXD_orderGenotypesMissing()'
 
 # this product sets the MGI_Note/MGI_NoteChunk information
 # this has been intentionally commented out - the entire cache is run from the wrapper
@@ -284,19 +284,11 @@ def initialize():
     except:
         exit(1, 'Could not open file %s\n' % genotypeOutputName)
 
-    # Log all SQL
-    db.set_sqlLogFunction(db.sqlLogAll)
-
-    # Set Log File Descriptor
-    db.set_sqlLogFD(diagFile)
-
     diagFile.write('Start Date/Time: %s\n' % (mgi_utils.date()))
     diagFile.write('Server: %s\n' % (db.get_sqlServer()))
     diagFile.write('Database: %s\n' % (db.get_sqlDatabase()))
 
     errorFile.write('Start Date/Time: %s\n\n' % (mgi_utils.date()))
-
-    return 0
 
 # Purpose: verify processing mode
 # Returns: nothing
@@ -315,8 +307,6 @@ def verifyMode():
     elif mode != 'load':
         exit(1, 'Invalid Processing Mode:  %s\n' % (mode))
 
-    return 0
-
 # Purpose:  sets global primary key variables
 # Returns:  nothing
 # Assumes:  nothing
@@ -327,23 +317,21 @@ def setPrimaryKeys():
 
     global genotypeKey, allelepairKey, accKey, noteKey, mgiKey
 
-    results = db.sql('select maxKey = max(_Genotype_key) from GXD_Genotype', 'auto')
+    results = db.sql('select max(_Genotype_key) as maxKey from GXD_Genotype', 'auto')
     genotypeKey = results[0]['maxKey']
 
-    results = db.sql('select maxKey = max(_AllelePair_key) from GXD_AllelePair', 'auto')
+    results = db.sql('select max(_AllelePair_key) as maxKey from GXD_AllelePair', 'auto')
     allelepairKey = results[0]['maxKey']
 
-    results = db.sql('select maxKey = max(_Accession_key) from ACC_Accession', 'auto')
+    results = db.sql('select max(_Accession_key) as maxKey from ACC_Accession', 'auto')
     accKey = results[0]['maxKey']
 
-    results = db.sql('select maxKey = max(_Note_key) from MGI_Note', 'auto')
+    results = db.sql('select max(_Note_key) as maxKey from MGI_Note', 'auto')
     noteKey = results[0]['maxKey']
 
-    results = db.sql('select maxKey = maxNumericPart from ACC_AccessionMax ' + \
-        'where prefixPart = "%s"' % (mgiPrefix), 'auto')
+    results = db.sql('select maxNumericPart as maxKey from ACC_AccessionMax ' + \
+        'where prefixPart = \'%s\'' % (mgiPrefix), 'auto')
     mgiKey = results[0]['maxKey']
-
-    return 0
 
 # Purpose:  BCPs the data into the database
 # Returns:  nothing
@@ -353,13 +341,12 @@ def setPrimaryKeys():
 
 def bcpFiles():
 
-    bcpdelim = "|"
 
     if DEBUG or not bcpon:
-        return 0
+        return
 
     if skipBCP:
-	return 0
+	return
 
     genotypeFile.close()
     allelepairFile.close()
@@ -367,14 +354,16 @@ def bcpFiles():
     noteFile.close()
     noteChunkFile.close()
 
-    bcpI = 'cat %s | bcp %s..' % (passwordFileName, db.get_sqlDatabase())
-    bcpII = '-c -t\"|" -S%s -U%s' % (db.get_sqlServer(), db.get_sqlUser())
+    bcpCommand = os.environ['PG_DBUTILS'] + '/bin/bcpin.csh'
 
-    bcp1 = '%s%s in %s %s' % (bcpI, genotypeTable, genotypeFileName, bcpII)
-    bcp2 = '%s%s in %s %s' % (bcpI, allelepairTable, allelepairFileName, bcpII)
-    bcp3 = '%s%s in %s %s' % (bcpI, accTable, accFileName, bcpII)
-    bcp4 = '%s%s in %s %s' % (bcpI, noteTable, noteFileName, bcpII)
-    bcp5 = '%s%s in %s %s' % (bcpI, noteChunkTable, noteChunkFileName, bcpII)
+    bcpI = '%s %s %s' % (bcpCommand, db.get_sqlServer(), db.get_sqlDatabase())
+    bcpII = '"|" "\\n" mgd'
+
+    bcp1 = '%s %s "/" %s %s' % (bcpI, genotypeTable, genotypeFileName, bcpII)
+    bcp2 = '%s %s "/" %s %s' % (bcpI, allelepairTable, allelepairFileName, bcpII)
+    bcp3 = '%s %s "/" %s %s' % (bcpI, accTable, accFileName, bcpII)
+    bcp4 = '%s %s "/" %s %s' % (bcpI, noteTable, noteFileName, bcpII)
+    bcp5 = '%s %s "/" %s %s' % (bcpI, noteChunkTable, noteChunkFileName, bcpII)
 
     for bcpCmd in [bcp1, bcp2, bcp3, bcp4, bcp5]:
 	diagFile.write('%s\n' % bcpCmd)
@@ -382,13 +371,12 @@ def bcpFiles():
 
     # run allele/genotype cache
     db.sql(orderGenotypes, None)
+    db.commit()
 
     # this has been intentionally commented out - the entire cache is run from the wrapper
     # run alleleCombination for each genotype added
     #diagFile.write('%s\n' % runAlleleCombination)
     #os.system(''.join(runAlleleCombination))
-
-    return 0
 
 # Purpose:  processes data
 # Returns:  nothing
@@ -561,27 +549,21 @@ def processFile():
 
     if not DEBUG and not skipBCP:
         db.sql(accSetMax % (lineNum), None)
-
-    return 0
+	db.commit()
 
 #
 # Main
 #
 
-if initialize() != 0:
-    exit(1)
+initialize()
 
-if verifyMode() != 0:
-    exit(1)
+verifyMode()
 
-if setPrimaryKeys() != 0:
-    exit(1)
+setPrimaryKeys()
 
-if processFile() != 0:
-    exit(1)
+processFile()
 
-if bcpFiles() != 0:
-    exit(1)
+bcpFiles()
 
 exit(0)
 
