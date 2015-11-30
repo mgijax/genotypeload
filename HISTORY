@@ -1,3 +1,9 @@
+TAG: genotypeload-6-0-1-1
+DATE: 11/30/2015
+STAFF: dbm
+CHANGES: TR11904 & TR12199
+1) genotypeload.config.default: Don't override MAIL_LOG_PROC
+
 TAG: genotypeload-6-0-0-1
 DATE: 7/23/15
 STAFF: pf
