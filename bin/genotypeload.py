@@ -82,6 +82,9 @@
 #
 # History
 #
+# 12/09/2015	lec
+#	- TR11216/sanger is obsolete/impc only
+#
 # 08/28/2012	lec
 #	- TR10273/sanger MP annotations
 #
@@ -92,6 +95,10 @@ import db
 import mgi_utils
 import loadlib
 import alleleloadlib
+
+db.setTrace(True)
+db.setAutoTranslate(False)
+db.setAutoTranslateBE(False)
 
 #globals
 
