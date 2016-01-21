@@ -172,7 +172,8 @@ mgiTypeKey = 12		# ACC_MGIType._MGIType_key for Genotype
 strainTypeKey = 10      # ACC_MGIType._MGIType_key for Strain
 alleleTypeKey = 11      # ACC_MGIType._MGIType_key for Allele
 mgiPrefix = "MGI:"
-
+rrPrefix = "RRID:MGI:"
+rrLdbKey = 179
 runAlleleCombination = []
 
 loaddate = loadlib.loaddate
@@ -522,6 +523,11 @@ def processFile():
             accFile.write('%s|%s%d|%s|%s|1|%d|%d|0|1|%s|%s|%s|%s\n' \
                 % (accKey, mgiPrefix, mgiKey, mgiPrefix, mgiKey, genotypeKey, mgiTypeKey, \
 	           createdByKey, createdByKey, loaddate, loaddate))
+	    ## RR Accession ID for the new genotype
+	    accKey = accKey + 1
+	    accFile.write('%s|%s%d|%s|%s|%d|%d|%d|0|1|%s|%s|%s|%s\n' \
+                % (accKey, rrPrefix, mgiKey, rrPrefix, mgiKey, rrLdbKey, genotypeKey, mgiTypeKey, \
+                   createdByKey, createdByKey, loaddate, loaddate))
 
             # this has been intentionally commented out - the entire cache is run from the wrapper
 	    # call allele-combinatin re-fresh for this genotype
