@@ -97,8 +97,6 @@ import loadlib
 import alleleloadlib
 
 db.setTrace(True)
-db.setAutoTranslate(False)
-db.setAutoTranslateBE(False)
 
 #globals
 
