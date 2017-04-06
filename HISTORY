@@ -1,3 +1,9 @@
+TAG: genotypeload-6-0-9-1
+DATE: 04/06/2017
+STAFF: lec 
+CHANGES:
+1) TR12504/IMPC/lacz/change call to GXD_orderGenotypes()
+
 TAG: genotypeload-6-0-7-1
 DATE: 01/05/2017
 STAFF: lec 

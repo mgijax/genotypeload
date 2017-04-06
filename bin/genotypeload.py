@@ -48,8 +48,8 @@
 # 2) To add at a later date: Images (use imageload)
 #
 # Postprocessing:
-#	exec GXD_orderAllelePairs : no necessary since we will order as part of this load
-#	exec GXD_orderGenotypesMissing (GXD_AlleleGenotype cache): done
+#	execute GXD_orderAllelePairs : not necessary since we will order as part of this load
+#	execute GXD_orderGenotypesMissing (GXD_AlleleGenotype cache): done
 #	allele combination ('allelecombination.csh'): done
 #	OMIM cache: not done
 #
@@ -114,7 +114,8 @@ accSetMax = 'select * from  ACC_setMax(%d)'
 
 # this stored-procedure sets the GXD_AlleleGenotype information of
 # all genotypes that do not have data in the cache
-orderGenotypes = 'select * from GXD_orderGenotypesMissing()'
+# intentionally commented out because of a data memory issue in postgres
+#orderGenotypes = 'select * from GXD_orderGenotypesMissing()'
 
 # this product sets the MGI_Note/MGI_NoteChunk information
 # this has been intentionally commented out - the entire cache is run from the wrapper
@@ -375,9 +376,36 @@ def bcpFiles():
 	diagFile.write('%s\n' % bcpCmd)
 	os.system(bcpCmd)
 
-    # run allele/genotype cache
-    db.sql(orderGenotypes, None)
-    db.commit()
+    #
+    # used to call GXD_orderGenotypesMissing() but this may run out of memory
+    # so need to split this into the _Allele_key_1 and _Allele_key_2 sections
+    #
+    results = db.sql('''
+	SELECT DISTINCT _Allele_key_1 as allele_key
+	FROM GXD_AllelePair a
+	WHERE not exists 
+	(SELECT 1 FROM GXD_AlleleGenotype g 
+	WHERE a._Genotype_key = g._Genotype_key
+	AND a._Allele_key_1 = g._Allele_key)
+    	''', 'auto')
+     
+    for r in results:
+	db.sql('select * from GXD_orderGenotypes(%s)' % (r['allele_key']), None)
+        db.commit()
+
+    results = db.sql('''
+	SELECT DISTINCT _Allele_key_2 as allele_key
+	FROM GXD_AllelePair a
+	WHERE a._Allele_key_2 IS NOT NULL
+	AND NOT EXISTS 
+	(SELECT 1 FROM GXD_AlleleGenotype g 
+	WHERE a._Genotype_key = g._Genotype_key
+	AND a._Allele_key_2 = g._Allele_key)
+    	''', 'auto')
+     
+    for r in results:
+	db.sql('select * from GXD_orderGenotypes(%s)' % (r['allele_key']), None)
+        db.commit()
 
     # this has been intentionally commented out - the entire cache is run from the wrapper
     # run alleleCombination for each genotype added
