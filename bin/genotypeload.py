@@ -473,8 +473,24 @@ def processFile():
 	# marker key
 	markerKey = loadlib.verifyMarker(markerID, lineNum, errorFile)
 
+	#
+	# all alleles must be in ('Approved', 'Autoload')
+	#
 	# allele1 key
-	allele1Key = loadlib.verifyObject(allele1ID, alleleTypeKey, None, lineNum, errorFile)
+	#
+	results = db.sql('''select a._Object_key
+		from ACC_Accession a, ALL_Allele aa
+		where a.accID = '%s'
+		and a._MGIType_key = %s
+		and a._Object_key = aa._Allele_key
+		and aa._Allele_Status_key in (847114, 3983021)
+		''' % (allele1ID, alleleTypeKey), 'auto')
+	if len(results) > 0:
+	    for r in results:
+	        allele1Key = r['_Object_key']
+        else:
+	    errorFile.write('Invalid Allele 1 (row %d) %s\n' % (lineNum, allele1ID))
+	    allele1Key = 0
 
 	# mutant1 key
 	if len(mutant1ID) > 0:
@@ -484,7 +500,19 @@ def processFile():
 
 	# allele2 key
 	if len(allele2ID) > 0:
-	    allele2Key = loadlib.verifyObject(allele2ID, alleleTypeKey, None, lineNum, errorFile)
+	    results = db.sql('''select a._Object_key
+		    from ACC_Accession a, ALL_Allele aa
+		    where a.accID = '%s'
+		    and a._MGIType_key = %s
+		    and a._Object_key = aa._Allele_key
+		    and aa._Allele_Status_key in (847114, 3983021)
+		    ''' % (allele2ID, alleleTypeKey), 'auto')
+	    if len(results) > 0:
+	        for r in results:
+	            allele2Key = r['_Object_key']
+            else:
+	        errorFile.write('Invalid Allele 2 (row %d) %s\n' % (lineNum, allele1ID))
+	        allele2Key = 0
         else:
 	    allele2Key = ''
 
@@ -513,6 +541,7 @@ def processFile():
 	if strainKey == 0 \
 		or markerKey == 0 \
 		or allele1Key == 0 \
+		or allele2Key == 0 \
 		or existsAsKey == 0 \
 		or pairStateKey == 0 \
 		or pairCompundKey == 0 \
