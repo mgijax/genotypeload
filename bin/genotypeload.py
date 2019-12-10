@@ -204,7 +204,7 @@ def exit(
 
     db.useOneConnection(0)
     sys.exit(status)
- 
+
 # Purpose: process command line options
 # Returns: nothing
 # Assumes: nothing
@@ -324,10 +324,10 @@ def setPrimaryKeys():
 
     global genotypeKey, allelepairKey, accKey, noteKey, mgiKey
 
-    results = db.sql('select max(_Genotype_key) as maxKey from GXD_Genotype', 'auto')
+    results = db.sql(''' select nextval('gxd_genotype_seq') as maxKey ''', 'auto')
     genotypeKey = results[0]['maxKey']
 
-    results = db.sql('select max(_AllelePair_key) as maxKey from GXD_AllelePair', 'auto')
+    results = db.sql(''' select nextval('gxd_allelepair_seq') as maxKey ''', 'auto')
     allelepairKey = results[0]['maxKey']
 
     results = db.sql('select max(_Accession_key) as maxKey from ACC_Accession', 'auto')
@@ -411,6 +411,14 @@ def bcpFiles():
     # run alleleCombination for each genotype added
     #diagFile.write('%s\n' % runAlleleCombination)
     #os.system(''.join(runAlleleCombination))
+
+    # update gxd_genotype auto-sequence
+    db.sql(''' select setval('gxd_genotype_seq', (select max(_Genotype_key) from GXD_Genotype)) ''', None)
+    db.commit()
+
+    # update gxd_allelepair auto-sequence
+    db.sql(''' select setval('gxd_allelepair_seq', (select max(_AllelePair_key) from GXD_AllelePair)) ''', None)
+    db.commit()
 
 # Purpose:  processes data
 # Returns:  nothing
