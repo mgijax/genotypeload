@@ -186,7 +186,7 @@ skipBCP = 1		# does the BCP file load need to be skipped?
 
 def exit(
     status,          # numeric exit status (integer)
-    message = None   # exit message (string)
+    message = None   # exit message (str.
     ):
 
     if message is not None:
