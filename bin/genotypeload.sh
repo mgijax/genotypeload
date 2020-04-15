@@ -99,7 +99,7 @@ fi
 echo "" >> ${LOG}
 date >> ${LOG}
 echo "Call genotypeload.py" | tee -a ${LOG}
-./genotypeload.py 2>&1 >> ${LOG}
+${PYTHON} ./genotypeload.py 2>&1 >> ${LOG}
 STAT=$?
 checkStatus ${STAT} "Call genotypeload.py"
 
