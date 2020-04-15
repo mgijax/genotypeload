@@ -1,4 +1,3 @@
-#!/usr/local/bin/python
 
 #
 # Program: genotypeload.py
@@ -198,7 +197,7 @@ def exit(
         errorFile.write('\n\nEnd Date/Time: %s\n' % (mgi_utils.date()))
         diagFile.close()
         errorFile.close()
-	inputFile.close()
+        inputFile.close()
     except:
         pass
 
@@ -250,12 +249,12 @@ def initialize():
         diagFile = open(diagFileName, 'w')
     except:
         exit(1, 'Could not open file %s\n' % diagFileName)
-		
+                
     try:
         errorFile = open(errorFileName, 'w')
     except:
         exit(1, 'Could not open file %s\n' % errorFileName)
-		
+                
     try:
         inputFile = open(inputFileName, 'r')
     except:
@@ -353,7 +352,7 @@ def bcpFiles():
         return
 
     if skipBCP:
-	return
+        return
 
     genotypeFile.close()
     allelepairFile.close()
@@ -373,38 +372,38 @@ def bcpFiles():
     bcp5 = '%s %s "/" %s %s' % (bcpI, noteChunkTable, noteChunkFileName, bcpII)
 
     for bcpCmd in [bcp1, bcp2, bcp3, bcp4, bcp5]:
-	diagFile.write('%s\n' % bcpCmd)
-	os.system(bcpCmd)
+        diagFile.write('%s\n' % bcpCmd)
+        os.system(bcpCmd)
 
     #
     # used to call GXD_orderGenotypesMissing() but this may run out of memory
     # so need to split this into the _Allele_key_1 and _Allele_key_2 sections
     #
     results = db.sql('''
-	SELECT DISTINCT _Allele_key_1 as allele_key
-	FROM GXD_AllelePair a
-	WHERE not exists 
-	(SELECT 1 FROM GXD_AlleleGenotype g 
-	WHERE a._Genotype_key = g._Genotype_key
-	AND a._Allele_key_1 = g._Allele_key)
-    	''', 'auto')
+        SELECT DISTINCT _Allele_key_1 as allele_key
+        FROM GXD_AllelePair a
+        WHERE not exists 
+        (SELECT 1 FROM GXD_AlleleGenotype g 
+        WHERE a._Genotype_key = g._Genotype_key
+        AND a._Allele_key_1 = g._Allele_key)
+        ''', 'auto')
      
     for r in results:
-	db.sql('select * from GXD_orderGenotypes(%s)' % (r['allele_key']), None)
+        db.sql('select * from GXD_orderGenotypes(%s)' % (r['allele_key']), None)
         db.commit()
 
     results = db.sql('''
-	SELECT DISTINCT _Allele_key_2 as allele_key
-	FROM GXD_AllelePair a
-	WHERE a._Allele_key_2 IS NOT NULL
-	AND NOT EXISTS 
-	(SELECT 1 FROM GXD_AlleleGenotype g 
-	WHERE a._Genotype_key = g._Genotype_key
-	AND a._Allele_key_2 = g._Allele_key)
-    	''', 'auto')
+        SELECT DISTINCT _Allele_key_2 as allele_key
+        FROM GXD_AllelePair a
+        WHERE a._Allele_key_2 IS NOT NULL
+        AND NOT EXISTS 
+        (SELECT 1 FROM GXD_AlleleGenotype g 
+        WHERE a._Genotype_key = g._Genotype_key
+        AND a._Allele_key_2 = g._Allele_key)
+        ''', 'auto')
      
     for r in results:
-	db.sql('select * from GXD_orderGenotypes(%s)' % (r['allele_key']), None)
+        db.sql('select * from GXD_orderGenotypes(%s)' % (r['allele_key']), None)
         db.commit()
 
     # this has been intentionally commented out - the entire cache is run from the wrapper
@@ -447,175 +446,175 @@ def processFile():
         tokens = line[:-1].split('\t')
 
         try:
-	    genotypeOrder = tokens[0]
-	    genotypeID = tokens[1]
-	    strainID = tokens[2]
-	    strainName = tokens[3]
-	    markerID = tokens[4]
-	    allele1ID = tokens[5]
-	    mutant1ID = tokens[6]
-	    allele2ID = tokens[7]
-	    mutant2ID = tokens[8]
-	    conditional = tokens[9]
-	    existsAs = tokens[10]
-	    generalNote = tokens[11]
-	    privateNote = tokens[12]
-	    pairState = tokens[13]
-	    pairCompound = tokens[14]
-	    createdBy = tokens[15]
+            genotypeOrder = tokens[0]
+            genotypeID = tokens[1]
+            strainID = tokens[2]
+            strainName = tokens[3]
+            markerID = tokens[4]
+            allele1ID = tokens[5]
+            mutant1ID = tokens[6]
+            allele2ID = tokens[7]
+            mutant2ID = tokens[8]
+            conditional = tokens[9]
+            existsAs = tokens[10]
+            generalNote = tokens[11]
+            privateNote = tokens[12]
+            pairState = tokens[13]
+            pairCompound = tokens[14]
+            createdBy = tokens[15]
         except:
             exit(1, 'Invalid Line (%d): %s\n' % (lineNum, line))
 
-	# if the genotypeID is specified, then skip this row
-	# this signifies that this genotype already exists in the system
+        # if the genotypeID is specified, then skip this row
+        # this signifies that this genotype already exists in the system
 
-	if len(genotypeID) > 0:
+        if len(genotypeID) > 0:
             genotypeOutput.write('%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' % (\
-	        genotypeOrder, genotypeID, strainID, strainName, markerID, allele1ID, allele2ID, conditional, \
-	        existsAs, generalNote, privateNote, pairState, pairCompound, createdBy))
-	    continue
+                genotypeOrder, genotypeID, strainID, strainName, markerID, allele1ID, allele2ID, conditional, \
+                existsAs, generalNote, privateNote, pairState, pairCompound, createdBy))
+            continue
 
-	# strain key
-	strainKey = loadlib.verifyObject(strainID, strainTypeKey, None, lineNum, errorFile)
+        # strain key
+        strainKey = loadlib.verifyObject(strainID, strainTypeKey, None, lineNum, errorFile)
 
-	# marker key
-	markerKey = loadlib.verifyMarker(markerID, lineNum, errorFile)
+        # marker key
+        markerKey = loadlib.verifyMarker(markerID, lineNum, errorFile)
 
-	#
-	# all alleles must be in ('Approved', 'Autoload')
-	#
-	# allele1 key
-	#
-	results = db.sql('''select a._Object_key
-		from ACC_Accession a, ALL_Allele aa
-		where a.accID = '%s'
-		and a._MGIType_key = %s
-		and a._Object_key = aa._Allele_key
-		and aa._Allele_Status_key in (847114, 3983021)
-		''' % (allele1ID, alleleTypeKey), 'auto')
-	if len(results) > 0:
-	    for r in results:
-	        allele1Key = r['_Object_key']
+        #
+        # all alleles must be in ('Approved', 'Autoload')
+        #
+        # allele1 key
+        #
+        results = db.sql('''select a._Object_key
+                from ACC_Accession a, ALL_Allele aa
+                where a.accID = '%s'
+                and a._MGIType_key = %s
+                and a._Object_key = aa._Allele_key
+                and aa._Allele_Status_key in (847114, 3983021)
+                ''' % (allele1ID, alleleTypeKey), 'auto')
+        if len(results) > 0:
+            for r in results:
+                allele1Key = r['_Object_key']
         else:
-	    errorFile.write('Invalid Allele 1 (row %d) %s\n' % (lineNum, allele1ID))
-	    allele1Key = 0
+            errorFile.write('Invalid Allele 1 (row %d) %s\n' % (lineNum, allele1ID))
+            allele1Key = 0
 
-	# mutant1 key
-	if len(mutant1ID) > 0:
-	    mutant1Key = alleleloadlib.verifyMutnatCellLine(mutant1ID, lineNum, errorFile)
-	else:
-	    mutant1Key = ''
+        # mutant1 key
+        if len(mutant1ID) > 0:
+            mutant1Key = alleleloadlib.verifyMutnatCellLine(mutant1ID, lineNum, errorFile)
+        else:
+            mutant1Key = ''
 
-	# allele2 key
-	if len(allele2ID) > 0:
-	    results = db.sql('''select a._Object_key
-		    from ACC_Accession a, ALL_Allele aa
-		    where a.accID = '%s'
-		    and a._MGIType_key = %s
-		    and a._Object_key = aa._Allele_key
-		    and aa._Allele_Status_key in (847114, 3983021)
-		    ''' % (allele2ID, alleleTypeKey), 'auto')
-	    if len(results) > 0:
-	        for r in results:
-	            allele2Key = r['_Object_key']
+        # allele2 key
+        if len(allele2ID) > 0:
+            results = db.sql('''select a._Object_key
+                    from ACC_Accession a, ALL_Allele aa
+                    where a.accID = '%s'
+                    and a._MGIType_key = %s
+                    and a._Object_key = aa._Allele_key
+                    and aa._Allele_Status_key in (847114, 3983021)
+                    ''' % (allele2ID, alleleTypeKey), 'auto')
+            if len(results) > 0:
+                for r in results:
+                    allele2Key = r['_Object_key']
             else:
-	        errorFile.write('Invalid Allele 2 (row %d) %s\n' % (lineNum, allele1ID))
-	        allele2Key = 0
+                errorFile.write('Invalid Allele 2 (row %d) %s\n' % (lineNum, allele1ID))
+                allele2Key = 0
         else:
-	    allele2Key = ''
+            allele2Key = ''
 
-	# mutant2 key
-	if len(mutant2ID) > 0:
-	    mutant2Key = alleleloadlib.verifyMutnatCellLine(mutant2ID, lineNum, errorFile)
-	else:
-	    mutant2Key = ''
+        # mutant2 key
+        if len(mutant2ID) > 0:
+            mutant2Key = alleleloadlib.verifyMutnatCellLine(mutant2ID, lineNum, errorFile)
+        else:
+            mutant2Key = ''
 
-	if conditional == 'yes':
-	    conditionalKey = 1
-	else:
-	    conditionalKey = 0
+        if conditional == 'yes':
+            conditionalKey = 1
+        else:
+            conditionalKey = 0
 
-	# _vocab_key = 60 (Genotype Exists As)
-	existsAsKey = loadlib.verifyTerm('', 60, existsAs, lineNum, errorFile)
+        # _vocab_key = 60 (Genotype Exists As)
+        existsAsKey = loadlib.verifyTerm('', 60, existsAs, lineNum, errorFile)
 
-	# _vocab_key = 39 (Allele Pair State)
-	pairStateKey = loadlib.verifyTerm('', 39, pairState, lineNum, errorFile)
+        # _vocab_key = 39 (Allele Pair State)
+        pairStateKey = loadlib.verifyTerm('', 39, pairState, lineNum, errorFile)
 
-	# _vocab_key = 42 (Allele Compound)
-	pairCompundKey = loadlib.verifyTerm('', 42, pairCompound, lineNum, errorFile)
+        # _vocab_key = 42 (Allele Compound)
+        pairCompundKey = loadlib.verifyTerm('', 42, pairCompound, lineNum, errorFile)
 
-	createdByKey = loadlib.verifyUser(createdBy, lineNum, errorFile)
+        createdByKey = loadlib.verifyUser(createdBy, lineNum, errorFile)
 
-	if strainKey == 0 \
-		or markerKey == 0 \
-		or allele1Key == 0 \
-		or allele2Key == 0 \
-		or existsAsKey == 0 \
-		or pairStateKey == 0 \
-		or pairCompundKey == 0 \
-		or createdByKey == 0:
-	    error = 1
+        if strainKey == 0 \
+                or markerKey == 0 \
+                or allele1Key == 0 \
+                or allele2Key == 0 \
+                or existsAsKey == 0 \
+                or pairStateKey == 0 \
+                or pairCompundKey == 0 \
+                or createdByKey == 0:
+            error = 1
 
         # if errors, continue to next record
         if error:
             continue
 
-	# same genotype order...same genotype/multiple allele pairs
-	if genotypeOrder == prevGenotypeOrder:
-	    nextGenotype = 0
-	    sequenceNum = sequenceNum + 1
-	# different genotype order...single allele pair
+        # same genotype order...same genotype/multiple allele pairs
+        if genotypeOrder == prevGenotypeOrder:
+            nextGenotype = 0
+            sequenceNum = sequenceNum + 1
+        # different genotype order...single allele pair
         else:
-	    nextGenotype = 1
-	    sequenceNum = 1
+            nextGenotype = 1
+            sequenceNum = 1
 
         # if no errors, process the allele
 
-	if nextGenotype:
+        if nextGenotype:
 
-	    # increment 
-	    genotypeKey = genotypeKey + 1
+            # increment 
+            genotypeKey = genotypeKey + 1
             mgiKey = mgiKey + 1
             accKey = accKey + 1
 
             genotypeFile.write('%s|%s|%s||%s|%s|%s|%s|%s\n' \
                 % (genotypeKey, strainKey, conditionalKey, existsAsKey, \
-	           createdByKey, createdByKey, loaddate, loaddate))
+                   createdByKey, createdByKey, loaddate, loaddate))
 
             # MGI Accession ID for the new genotype
             accFile.write('%s|%s%d|%s|%s|1|%d|%d|0|1|%s|%s|%s|%s\n' \
                 % (accKey, mgiPrefix, mgiKey, mgiPrefix, mgiKey, genotypeKey, mgiTypeKey, \
-	           createdByKey, createdByKey, loaddate, loaddate))
-	    ## RR Accession ID for the new genotype
-	    accKey = accKey + 1
-	    accFile.write('%s|%s%d|%s|%s|%d|%d|%d|0|1|%s|%s|%s|%s\n' \
+                   createdByKey, createdByKey, loaddate, loaddate))
+            ## RR Accession ID for the new genotype
+            accKey = accKey + 1
+            accFile.write('%s|%s%d|%s|%s|%d|%d|%d|0|1|%s|%s|%s|%s\n' \
                 % (accKey, rrPrefix, mgiKey, rrPrefix, mgiKey, rrLdbKey, genotypeKey, mgiTypeKey, \
                    createdByKey, createdByKey, loaddate, loaddate))
 
             # this has been intentionally commented out - the entire cache is run from the wrapper
-	    # call allele-combinatin re-fresh for this genotype
-	    #runAlleleCombination.append(alleleCombination % (genotypeKey))
+            # call allele-combinatin re-fresh for this genotype
+            #runAlleleCombination.append(alleleCombination % (genotypeKey))
 
-	allelepairKey = allelepairKey + 1
+        allelepairKey = allelepairKey + 1
         allelepairFile.write('%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s\n' \
-	    % (allelepairKey, genotypeKey, allele1Key, allele2Key, markerKey, \
-	       mutant1Key, mutant2Key, \
-	       pairStateKey, pairCompundKey, sequenceNum, \
-	       createdByKey, createdByKey, loaddate, loaddate))
+            % (allelepairKey, genotypeKey, allele1Key, allele2Key, markerKey, \
+               mutant1Key, mutant2Key, \
+               pairStateKey, pairCompundKey, sequenceNum, \
+               createdByKey, createdByKey, loaddate, loaddate))
 
-	# Print out a new text file and attach the new MGI Allele IDs as the last field
+        # Print out a new text file and attach the new MGI Allele IDs as the last field
 
-	genotypeID = mgiPrefix + str(mgiKey)
+        genotypeID = mgiPrefix + str(mgiKey)
 
         genotypeOutput.write('%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' % (\
-	    genotypeOrder, genotypeID, strainID, strainName, markerID, allele1ID, allele2ID, conditional, \
-	    existsAs, generalNote, privateNote, pairState, pairCompound, createdBy))
+            genotypeOrder, genotypeID, strainID, strainName, markerID, allele1ID, allele2ID, conditional, \
+            existsAs, generalNote, privateNote, pairState, pairCompound, createdBy))
 
-	# don't skip the bcp file loading...data exists that needs to be loaded
-	skipBCP = 0	
+        # don't skip the bcp file loading...data exists that needs to be loaded
+        skipBCP = 0	
 
-	# save previous genotypeOrder
-	prevGenotypeOrder = genotypeOrder
+        # save previous genotypeOrder
+        prevGenotypeOrder = genotypeOrder
 
     #	end of "for line in inputFile.readlines():"
 
@@ -625,7 +624,7 @@ def processFile():
 
     if not DEBUG and not skipBCP:
         db.sql(accSetMax % (lineNum), None)
-	db.commit()
+        db.commit()
 
 #
 # Main
@@ -642,4 +641,3 @@ processFile()
 bcpFiles()
 
 exit(0)
-
