@@ -117,7 +117,7 @@ accSetMax = 'select * from  ACC_setMax(%d)'
 # intentionally commented out because of a data memory issue in postgres
 #orderGenotypes = 'select * from GXD_orderGenotypesMissing()'
 
-# this product sets the MGI_Note/MGI_NoteChunk information
+# this product sets the MGI_Note information
 # this has been intentionally commented out - the entire cache is run from the wrapper
 #alleleCombination = os.environ['ALLCACHELOAD'] + '/allelecombinationByGenotype.py' + \
 #		' -S' + os.environ['MGD_DBSERVER'] + \
@@ -161,7 +161,6 @@ mgiKey = 0              # ACC_AccessionMax.maxNumericPart
 
 #noteKey = 0		# MGI_Note._Note_key
 #mgiNoteObjectKey = 12   # MGI_Note._MGIType_key
-#mgiNoteSeqNum = 1       # MGI_NoteChunk.sequenceNum
 #mgiGeneralNoteTypeKey = 1027   # MGI_Note._NoteType_key
 #mgiPrivateNoteTypeKey = 1028   # MGI_Note._NoteType_key
 
