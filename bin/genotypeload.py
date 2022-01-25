@@ -43,7 +43,8 @@
 #	field 15: Compound (ex. 'Top', 'Bottom', 'Not Applicable'
 #	field 16: Created By User
 #
-# 1) GXD_Genotype.note field exist but has never been used and is always null.
+# 1) GXD_Genotype.note field exist but has never been used and is always null,
+#       so, commentint out the code but not removing it
 # 2) To add at a later date: Images (use imageload)
 #
 # Postprocessing:
@@ -62,7 +63,7 @@
 #	**not needed because these will be picked up by the 
 #	the running of 'GXD_orderGenotypesMissing'
 #
-#       MGI_Note/MGI_NoteChunk          notes
+#       *not used MGI_Note                        notes
 #
 #       ACC_Accession.bcp               Accession records
 #
@@ -137,20 +138,17 @@ inputFile = ''		# file descriptor
 genotypeFile = ''       # file descriptor
 allelepairFile = ''	# file descriptor
 accFile = ''            # file descriptor
-noteFile = ''		# file descriptor
-noteChunkFile = ''	# file descriptor
+#noteFile = ''		# file descriptor
 
 genotypeTable = ''	# table name
 allelepairTable = ''	# table name
 accTable = ''		# table name
-noteTable = ''		# table name
-noteChunkTable = ''	# table name
+#noteTable = ''		# table name
 
 genotypeFileName = ''	# bcp file
 allelepairFileName = ''	# bcp file
 accFileName = ''	# bcp file
-noteFileName = ''	# bcp file
-noteChunkFileName = ''	# bcp file
+#noteFileName = ''	# bcp file
 genotypeOutputName = ''	# output file name
 
 diagFileName = ''	# diagnostic file name
@@ -159,12 +157,13 @@ errorFileName = ''	# error file name
 genotypeKey = 0         # GXD_Genotype._Genotype_key
 allelepairKey =  0	# GXD_AllelePair._AllelePair_key
 accKey = 0              # ACC_Accession._Accession_key
-noteKey = 0		# MGI_Note._Note_key
 mgiKey = 0              # ACC_AccessionMax.maxNumericPart
-mgiNoteObjectKey = 12   # MGI_Note._MGIType_key
-mgiNoteSeqNum = 1       # MGI_NoteChunk.sequenceNum
-mgiGeneralNoteTypeKey = 1027   # MGI_Note._NoteType_key
-mgiPrivateNoteTypeKey = 1028   # MGI_Note._NoteType_key
+
+#noteKey = 0		# MGI_Note._Note_key
+#mgiNoteObjectKey = 12   # MGI_Note._MGIType_key
+#mgiNoteSeqNum = 1       # MGI_NoteChunk.sequenceNum
+#mgiGeneralNoteTypeKey = 1027   # MGI_Note._NoteType_key
+#mgiPrivateNoteTypeKey = 1028   # MGI_Note._NoteType_key
 
 mgiTypeKey = 12		# ACC_MGIType._MGIType_key for Genotype
 strainTypeKey = 10      # ACC_MGIType._MGIType_key for Strain
@@ -214,14 +213,16 @@ def exit(
 def initialize():
     global diagFile, errorFile, inputFile, errorFileName, diagFileName
     global genotypeFile, allelepairFile
-    global accFile, noteFile, noteChunkFile
+    global accFile,
     global genotypeOutput
 
     global genotypeTable, allelepairTable
-    global accTable, noteTable, noteChunkTable
+    global accTable
 
     global genotypeFileName, allelepairFileName
-    global accFileName, noteFileName, noteChunkFileName, genotypeOutputName
+    global accFileName
+
+    #global noteFile, noteTable, noteFileName, genotypeOutputName
  
     db.useOneConnection(1)
     db.set_sqlUser(user)
@@ -233,16 +234,14 @@ def initialize():
     genotypeTable = 'GXD_Genotype'
     allelepairTable = 'GXD_AllelePair'
     accTable = 'ACC_Accession'
-    noteTable = 'MGI_Note'
-    noteChunkTable = 'MGI_NoteChunk'
+    #noteTable = 'MGI_Note'
 
     diagFileName = outputDir + '/' + tail + 'diagnostics'
     errorFileName = outputDir + '/' + tail + 'error'
     genotypeFileName = outputDir + '/' + tail + genotypeTable + '.bcp'
     allelepairFileName = outputDir + '/' + tail + allelepairTable + '.bcp'
     accFileName = outputDir + '/' + tail + accTable + '.bcp'
-    noteFileName = outputDir + '/' + tail + noteTable + '.bcp'
-    noteChunkFileName = outputDir + '/' + tail + noteChunkTable + '.bcp'
+    #noteFileName = outputDir + '/' + tail + noteTable + '.bcp'
     genotypeOutputName = genotypeOutput
 
     try:
@@ -275,15 +274,10 @@ def initialize():
     except:
         exit(1, 'Could not open file %s\n' % accFileName)
 
-    try:
-        noteFile = open(noteFileName, 'w')
-    except:
-        exit(1, 'Could not open file %s\n' % noteFileName)
-
-    try:
-        noteChunkFile = open(noteChunkFileName, 'w')
-    except:
-        exit(1, 'Could not open file %s\n' % noteChunkFileName)
+    #try:
+    #    noteFile = open(noteFileName, 'w')
+    #except:
+    #    exit(1, 'Could not open file %s\n' % noteFileName)
 
     try:
         genotypeOutput = open(genotypeOutputName, 'w')
@@ -321,7 +315,8 @@ def verifyMode():
 
 def setPrimaryKeys():
 
-    global genotypeKey, allelepairKey, accKey, noteKey, mgiKey
+    global genotypeKey, allelepairKey, accKey, mgiKey
+    #global noteKey
 
     results = db.sql(''' select nextval('gxd_genotype_seq') as maxKey ''', 'auto')
     genotypeKey = results[0]['maxKey']
@@ -332,8 +327,8 @@ def setPrimaryKeys():
     results = db.sql('select max(_Accession_key) as maxKey from ACC_Accession', 'auto')
     accKey = results[0]['maxKey']
 
-    results = db.sql('select max(_Note_key) as maxKey from MGI_Note', 'auto')
-    noteKey = results[0]['maxKey']
+    #results = db.sql(''' select nextval('mgi_note_seq') as maxKey ''', 'auto')
+    #noteKey = results[0]['maxKey']
 
     results = db.sql('select maxNumericPart as maxKey from ACC_AccessionMax ' + \
         'where prefixPart = \'%s\'' % (mgiPrefix), 'auto')
@@ -357,8 +352,7 @@ def bcpFiles():
     genotypeFile.close()
     allelepairFile.close()
     accFile.close()
-    noteFile.close()
-    noteChunkFile.close()
+    #noteFile.close()
 
     bcpCommand = os.environ['PG_DBUTILS'] + '/bin/bcpin.csh'
 
@@ -368,10 +362,9 @@ def bcpFiles():
     bcp1 = '%s %s "/" %s %s' % (bcpI, genotypeTable, genotypeFileName, bcpII)
     bcp2 = '%s %s "/" %s %s' % (bcpI, allelepairTable, allelepairFileName, bcpII)
     bcp3 = '%s %s "/" %s %s' % (bcpI, accTable, accFileName, bcpII)
-    bcp4 = '%s %s "/" %s %s' % (bcpI, noteTable, noteFileName, bcpII)
-    bcp5 = '%s %s "/" %s %s' % (bcpI, noteChunkTable, noteChunkFileName, bcpII)
+    #bcp4 = '%s %s "/" %s %s' % (bcpI, noteTable, noteFileName, bcpII)
 
-    for bcpCmd in [bcp1, bcp2, bcp3, bcp4, bcp5]:
+    for bcpCmd in [bcp1, bcp2, bcp3]:
         diagFile.write('%s\n' % bcpCmd)
         os.system(bcpCmd)
 
@@ -419,6 +412,10 @@ def bcpFiles():
     db.sql(''' select setval('gxd_allelepair_seq', (select max(_AllelePair_key) from GXD_AllelePair)) ''', None)
     db.commit()
 
+    # update mgi_note_seq auto-sequence
+    #db.sql(''' select setval('mgi_note_seq', (select max(_Note_key) from MGI_Note)) ''', None)
+    #db.commit()
+
 # Purpose:  processes data
 # Returns:  nothing
 # Assumes:  nothing
@@ -427,9 +424,10 @@ def bcpFiles():
 
 def processFile():
 
-    global genotypeKey, allelepairKey, accKey, noteKey, mgiKey
+    global genotypeKey, allelepairKey, accKey, mgiKey
     global runAlleleCombination
     global skipBCP
+    #global noteKey
 
     nextGenotype = 0
     prevGenotypeOrder = 0
