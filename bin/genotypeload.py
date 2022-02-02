@@ -212,7 +212,7 @@ def exit(
 def initialize():
     global diagFile, errorFile, inputFile, errorFileName, diagFileName
     global genotypeFile, allelepairFile
-    global accFile,
+    global accFile
     global genotypeOutput
 
     global genotypeTable, allelepairTable
